@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 43e28add924ae1f582951616c8a110988507c5d83ec6642043fc5e77be119b79
+-- hash: 9f35f5e213072f70c6ad060cea6702c831b51b79cc37089db3e6278428a63465
 
 name:           interpreter
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , parsec >=3.1.11 && <4
   default-language: Haskell2010
 
 executable interpreter-exe
@@ -46,6 +47,7 @@ executable interpreter-exe
   build-depends:
       base >=4.7 && <5
     , interpreter
+    , parsec >=3.1.11 && <4
   default-language: Haskell2010
 
 test-suite interpreter-test
@@ -59,4 +61,5 @@ test-suite interpreter-test
   build-depends:
       base >=4.7 && <5
     , interpreter
+    , parsec >=3.1.11 && <4
   default-language: Haskell2010
