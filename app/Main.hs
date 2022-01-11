@@ -1,9 +1,14 @@
 module Main where
 
 import Lib
+import AST
 import Text.ParserCombinators.Parsec
 -- import Text.ParserCombinators.Parsec.Expr
 
 
+
 main :: IO ()
-main = someFunc
+main = do
+    contents <- readFile "test/program.txt"
+    putStrLn contents
+    someFunc
