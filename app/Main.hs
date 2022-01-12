@@ -11,4 +11,3 @@ main :: IO ()
 main = do
     contents <- readFile "test/program.txt"
     putStrLn contents
-    someFunc
