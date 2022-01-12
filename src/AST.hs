@@ -53,7 +53,7 @@ program =
 Grammar
 
 prog ::= (expr ";")*
-expr ::= var | define | func | cond | loop | op | lit | block | call | assign
+expr ::= var | define | func | cond | loop | op | lit | block | call | assign | "(" expr ")"
 var ::= ident
 ident ::= [_a-zA-Z][_a-zA-Z0-9]*
 define ::= type ident "=" expr
