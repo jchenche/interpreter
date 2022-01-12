@@ -21,7 +21,7 @@ data Expr = Var Ident
           | Assign Ident Expr
     deriving Show
 
-data Val = VInt Int | VChar Char | VBool Bool | VInts [Int] | VChars [Char] | VBools [Bool] | VNull
+data Val = VInt Integer | VChar Char | VBool Bool | VInts [Integer] | VChars [Char] | VBools [Bool] | VNull
     deriving Show
 
 data Type = TInt | TChar | TBool | TInts | TChars | TBools | TVoid
