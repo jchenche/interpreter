@@ -12,8 +12,8 @@ prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)
 
 expr = var
    <|> try define
-   <|> lit
    <|> func
+   <|> lit
 
 var = Var <$> identifier
 
