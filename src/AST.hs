@@ -1,7 +1,7 @@
 module AST where
 
 data Prog = Prog [Expr]
-    deriving Show
+    deriving (Show, Eq)
 
 data Expr = Var Ident
           | Define Type Ident Expr
@@ -19,21 +19,21 @@ data Expr = Var Ident
           | Block [Expr]
           | Call Ident [Arg]
           | Assign Ident Expr
-    deriving Show
+    deriving (Show, Eq)
 
 data Val = VInt Integer | VChar Char | VBool Bool | VInts [Integer] | VChars [Char] | VBools [Bool] | VNull
-    deriving Show
+    deriving (Show, Eq)
 
 data Type = TInt | TChar | TBool | TInts | TChars | TBools | TVoid
-    deriving Show
+    deriving (Show, Eq)
 
 type Ident = String
 
 data Param = Param Type Ident
-    deriving Show
+    deriving (Show, Eq)
 
 data Arg = Arg Expr
-    deriving Show
+    deriving (Show, Eq)
 
 program :: Prog
 program =
@@ -57,8 +57,8 @@ expr ::= var | define | func | cond | loop | op | lit | block | call | assign | 
 var ::= ident
 ident ::= [_a-zA-Z][_a-zA-Z0-9]*
 define ::= type ident "=" expr
-func ::= type ident "(" params ")" expr
 type ::= "int" | "char" | "bool" | "int[]" | "char[]" | "bool[]" | "void"
+func ::= type ident "(" params ")" expr
 params ::= ( type ident ("," type ident)* ) | <empty>
 cond ::= "if" "(" expr ")" expr "else" expr
 loop ::= "while" "(" expr ")" expr

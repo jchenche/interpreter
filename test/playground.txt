@@ -1,1 +1,2 @@
-helloworld
+int x = 3;
+int identFunc(int num) num;
