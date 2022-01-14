@@ -10,7 +10,7 @@ data Expr = Var Ident
           | Loop Expr Expr
           | Not Expr -- | Neg Expr
           | And Expr Expr | Or Expr Expr
-          | Is Expr Expr | Isnot Expr Expr
+          | Is Expr Expr | IsNot Expr Expr
           | Add Expr Expr | Minus Expr Expr | Mult Expr Expr | Div Expr Expr
           | Lesser Expr Expr | LesserEq Expr Expr
           | Greater Expr Expr | GreaterEq Expr Expr
