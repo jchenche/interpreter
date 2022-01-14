@@ -13,7 +13,10 @@ prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)
 expr = var
    <|> try define
    <|> func
+   <|> cond
+   <|> loop
    <|> lit
+   <?> "expression"
 
 var = Var <$> identifier
 
@@ -25,13 +28,14 @@ define = do
     ; return $ Define t i e
     }
 
-parseType = TInt <$ reserved "int"
-        <|> TChar <$ reserved "char"
-        <|> TBool <$ reserved "bool"
-        <|> TInts <$ reserved "int[]"
-        <|> TChars <$ reserved "char[]"
-        <|> TBools <$ reserved "bool[]"
-        <|> TVoid <$ reserved "void"
+parseType = TInts <$ reserved keywordInts
+        <|> TChars <$ reserved keywordChars
+        <|> TBools <$ reserved keywordBools
+        <|> TInt <$ reserved keywordInt
+        <|> TChar <$ reserved keywordChar
+        <|> TBool <$ reserved keywordBool
+        <|> TVoid <$ reserved keywordVoid
+        <?> "type"
 
 func = do
     { t <- parseType
@@ -43,9 +47,48 @@ func = do
 
 params = commaSep (Param <$> parseType <*> identifier)
 
+cond = do
+    { reserved keywordIf
+    ; condition <- parens expr
+    ; e1 <- expr
+    ; reserved keywordElse
+    ; e2 <- expr
+    ; return $ Cond condition e1 e2
+    }
+
+loop = do
+    { reserved keywordWhile
+    ; condition <- parens expr
+    ; e <- expr
+    ; return $ Loop condition e
+    }
+
 lit = Lit . VInt <$> integer
+  <|> Lit . VChar <$> charLiteral
+  <|> (Lit $ VBool True) <$ reserved keywordTrue
+  <|> (Lit $ VBool False) <$ reserved keywordFalse
+  <|> try (Lit . VInts <$> brackets (commaSep integer))
+  <|> try (Lit . VChars <$> brackets (commaSep charLiteral))
+  <|> Lit . VBools <$> brackets (commaSep (True <$ reserved keywordTrue <|> False <$ reserved keywordFalse))
+  <|> Lit . VChars <$> stringLiteral
+  <|> Lit VNull <$ reserved keywordNull
+  <?> "literal"
 
 -- Lexer
+keywordInt = "int"
+keywordChar = "char"
+keywordBool = "bool"
+keywordInts = "int[]"
+keywordChars = "char[]"
+keywordBools = "bool[]"
+keywordVoid = "void"
+keywordIf = "if"
+keywordElse = "else"
+keywordWhile = "while"
+keywordTrue = "true"
+keywordFalse = "false"
+keywordNull = "null"
+
 customDef :: P.LanguageDef st
 customDef =  P.LanguageDef {
     P.commentStart = "/*",
@@ -56,7 +99,7 @@ customDef =  P.LanguageDef {
     P.identLetter = alphaNum <|> char '_',
     P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
-    P.reservedNames = ["int", "char", "bool", "int[]", "char[]", "bool[]", "void", "if", "else", "while", "true", "false", "null"],
+    P.reservedNames = [keywordInt, keywordChar, keywordBool, keywordInts, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull],
     P.reservedOpNames = ["not" ,"~" ,"and" ,"or" ,"is" ,"isnot" ,"+" ,"-" ,"*" ,"/" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!="],
     P.caseSensitive = True
 }
@@ -71,6 +114,9 @@ semiSep = P.semiSep lexer
 commaSep = P.commaSep lexer
 parens = P.parens lexer
 whiteSpace = P.whiteSpace lexer
+charLiteral = P.charLiteral lexer
+stringLiteral = P.stringLiteral lexer
+brackets = P.brackets lexer
 
 -- Entry point
 -- parseProg = parse expr "Parse Error" "1_helloWorld"

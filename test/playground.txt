@@ -1,2 +1,10 @@
 int x = 3;
 int identFunc(int num) num;
+
+bool[] conds = [true, true, false, true];
+while (true)
+    if (true) conds
+    else false;
+
+char[] greet = "hello world";
+null;
