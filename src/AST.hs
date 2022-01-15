@@ -8,12 +8,13 @@ data Expr = Var Ident
           | Func Type Ident [Param] Expr
           | Cond Expr Expr Expr
           | Loop Expr Expr
-          | Not Expr | Neg Expr
-          | And Expr Expr | Or Expr Expr
-          | Is Expr Expr | IsNot Expr Expr
-          | Equal Expr Expr | NotEqual Expr Expr
-          | Add Expr Expr | Minus Expr Expr | Mult Expr Expr | Div Expr Expr
+          | Not Expr | Neg Expr | Pos Expr
+          | Mult Expr Expr | Div Expr Expr
+          | Add Expr Expr | Minus Expr Expr
           | Lesser Expr Expr | LesserEq Expr Expr | Greater Expr Expr | GreaterEq Expr Expr
+          | Equal Expr Expr | NotEqual Expr Expr
+          | And Expr Expr
+          | Or Expr Expr
           | Lit Val
           | Block [Expr]
           | Call Ident [Arg]
@@ -71,12 +72,13 @@ func ::= type ident "(" params ")" expr
 params ::= ( type ident ("," type ident)* ) | <empty>
 cond ::= "if" "(" expr ")" expr "else" expr
 loop ::= "while" "(" expr ")" expr
-op ::= "not" expr | "!" expr | "~" expr
-     | expr "and" expr | expr "or" expr
-     | expr "is" expr | expr "isnot" expr
-     | expr "==" expr | expr "!=" expr
-     | expr "+" expr | expr "-" expr | expr "*" expr | expr "/" expr
+op ::= "!" expr | "-" expr | "+" expr
+     | expr "*" expr | expr "/" expr
+     | expr "+" expr | expr "-" expr
      | expr "<" expr | expr "<=" expr | expr ">" expr | expr ">=" expr
+     | expr "==" expr | expr "!=" expr
+     | expr "&&" expr
+     | expr "||" expr
 lit ::= integer | character | boolean | array | string | null
 interger ::= \d+
 characters ::= "'" \w+ "'"

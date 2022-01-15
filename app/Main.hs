@@ -15,6 +15,10 @@ expr = buildExpressionParser table term <?> "expression"
 table = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
         , [binary "*" Mult AssocLeft, binary "/" Div AssocLeft]
         , [binary "+" Add AssocLeft, binary "-" Minus AssocLeft]
+        , [binary "<" Lesser AssocLeft, binary "<=" LesserEq AssocLeft, binary ">" Greater AssocLeft, binary ">=" GreaterEq AssocLeft]
+        , [binary "==" Equal AssocLeft, binary "!=" NotEqual AssocLeft]
+        , [binary "&&" And AssocLeft]
+        , [binary "||" Or AssocLeft]
         ]
 
 binary  name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
