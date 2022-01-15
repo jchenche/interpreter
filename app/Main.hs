@@ -5,18 +5,30 @@ import AST
 import Text.Parsec
 import Text.Parsec.String
 import qualified Text.Parsec.Token as P
--- import Text.Parsec.Expr
+import Text.Parsec.Expr
 
 prog :: GenParser Char st Prog
 prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)
 
-expr = var
+expr = buildExpressionParser table term <?> "expression"
+
+table = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
+        , [binary "*" Mult AssocLeft, binary "/" Div AssocLeft]
+        , [binary "+" Add AssocLeft, binary "-" Minus AssocLeft]
+        ]
+
+binary  name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
+prefix  name fun       = Prefix (do{ reservedOp name; return fun })
+postfix name fun       = Postfix (do{ reservedOp name; return fun })
+
+term = var
    <|> try define
    <|> func
    <|> cond
    <|> loop
    <|> lit
-   <?> "expression"
+   <|> parens expr
+   <?> "term"
 
 var = Var <$> identifier
 
@@ -100,7 +112,7 @@ customDef =  P.LanguageDef {
     P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.reservedNames = [keywordInt, keywordChar, keywordBool, keywordInts, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull],
-    P.reservedOpNames = ["not" ,"~" ,"and" ,"or" ,"is" ,"isnot" ,"+" ,"-" ,"*" ,"/" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!="],
+    P.reservedOpNames = ["not", "!" ,"~" ,"and" ,"or" ,"is" ,"isnot" ,"+" ,"-" ,"*" ,"/" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!="],
     P.caseSensitive = True
 }
 
@@ -117,6 +129,7 @@ whiteSpace = P.whiteSpace lexer
 charLiteral = P.charLiteral lexer
 stringLiteral = P.stringLiteral lexer
 brackets = P.brackets lexer
+reservedOp = P.reservedOp lexer
 
 -- Entry point
 -- parseProg = parse expr "Parse Error" "1_helloWorld"

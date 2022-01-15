@@ -1,10 +1,12 @@
 int x = 3;
-int identFunc(int num) num;
+int identFunc(int num) (1 + -num) * num;
 
 bool[] conds = [true, true, false, true];
 while (true)
-    if (true) conds
+    if (true) 1 + -(if (true) x else x) * num
     else false;
 
 char[] greet = "hello world";
 null;
+
+/* TODO: define array access and modification and maybe add an "=" to functions */
