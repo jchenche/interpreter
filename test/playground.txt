@@ -1,5 +1,8 @@
 int x = 3;
-int identFunc(int num) (1 + -num) * num;
+int identFunc(int num) {
+    x;
+    (1 + -num) * num;
+};
 
 bool[] conds = [true, true, false, true];
 while (true)

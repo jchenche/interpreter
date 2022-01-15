@@ -48,7 +48,7 @@ program =
 
 played =
     Prog [Define TInt "x" (Lit (VInt 3))
-        , Func TInt "identFunc" [Param TInt "num"] (Mult (Add (Lit (VInt 1)) (Neg (Var "num"))) (Var "num"))
+        , Func TInt "identFunc" [Param TInt "num"] (Block [Var "x",Mult (Add (Lit (VInt 1)) (Neg (Var "num"))) (Var "num")])
         , Define TBools "conds" (Lit (VBools [True,True,False,True]))
         , Loop (Lit (VBool True)) (Cond (Lit (VBool True)) (Add (Lit (VInt 1)) (Mult (Neg (Cond (Lit (VBool True)) (Var "x") (Var "x"))) (Var "num"))) (Lit (VBool False)))
         , Define TChars "greet" (Lit (VChars "hello world"))

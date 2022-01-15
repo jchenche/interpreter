@@ -27,6 +27,7 @@ term = var
    <|> cond
    <|> loop
    <|> lit
+   <|> block
    <|> parens expr
    <?> "term"
 
@@ -74,6 +75,8 @@ loop = do
     ; e <- expr
     ; return $ Loop condition e
     }
+
+block = Block <$> braces (many1 (expr <* semi))
 
 lit = Lit . VInt <$> integer
   <|> Lit . VChar <$> charLiteral
@@ -130,6 +133,7 @@ charLiteral = P.charLiteral lexer
 stringLiteral = P.stringLiteral lexer
 brackets = P.brackets lexer
 reservedOp = P.reservedOp lexer
+braces = P.braces lexer
 
 -- Entry point
 -- parseProg = parse expr "Parse Error" "1_helloWorld"
