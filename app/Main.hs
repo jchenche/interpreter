@@ -11,9 +11,9 @@ import Text.Parsec.Expr
 prog :: GenParser Char st Prog
 prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)
 
-expr = buildExpressionParser table term <?> "expression"
+expr = buildExpressionParser opTable term <?> "expression"
 
-table = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
+opTable = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
         , [binary "*" Mult AssocLeft, binary "/" Div AssocLeft]
         , [binary "+" Add AssocLeft, binary "-" Minus AssocLeft]
         , [binary "<" Lesser AssocLeft, binary "<=" LesserEq AssocLeft, binary ">" Greater AssocLeft, binary ">=" GreaterEq AssocLeft]
@@ -22,9 +22,8 @@ table = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
         , [binary "||" Or AssocLeft]
         ]
 
-binary  name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
-prefix  name fun       = Prefix (do{ reservedOp name; return fun })
-postfix name fun       = Postfix (do{ reservedOp name; return fun })
+binary name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
+prefix name fun = Prefix (do{ reservedOp name; return fun })
 
 term = define
    <|> lit
