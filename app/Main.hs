@@ -26,8 +26,8 @@ prefix  name fun       = Prefix (do{ reservedOp name; return fun })
 postfix name fun       = Postfix (do{ reservedOp name; return fun })
 
 term = var
-   <|> try define
-   <|> func
+   <|> define
+   <|> try func
    <|> cond
    <|> loop
    <|> lit
@@ -40,7 +40,7 @@ var = Var <$> identifier
 define = do
     { t <- parseType
     ; i <- identifier
-    ; symbol "="
+    ; reserved keywordAssign
     ; e <- expr
     ; return $ Define t i e
     }
@@ -54,12 +54,12 @@ parseType = TInts <$ reserved keywordInts
         <|> TVoid <$ reserved keywordVoid
         <?> "type"
 
+-- Give void as the type for now and replace it during type-checking (maybe not needed)
 func = do
-    { t <- parseType
-    ; i <- identifier
-    ; ps <- parens params
+    { ps <- parens params
+    ; reserved keywordArrow
     ; e <- expr
-    ; return $ Func t i ps e
+    ; return $ Func TVoid ps e
     }
 
 params = commaSep (Param <$> parseType <*> identifier)
@@ -107,6 +107,8 @@ keywordWhile = "while"
 keywordTrue = "true"
 keywordFalse = "false"
 keywordNull = "null"
+keywordAssign = "="
+keywordArrow = "->"
 
 customDef :: P.LanguageDef st
 customDef =  P.LanguageDef {
@@ -118,7 +120,7 @@ customDef =  P.LanguageDef {
     P.identLetter = alphaNum <|> char '_',
     P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
-    P.reservedNames = [keywordInt, keywordChar, keywordBool, keywordInts, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull],
+    P.reservedNames = [keywordInt, keywordChar, keywordBool, keywordInts, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull, keywordAssign, keywordArrow],
     P.reservedOpNames = ["!" ,"*" ,"/" ,"+" ,"-" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!=", "&&", "||"],
     P.caseSensitive = True
 }
