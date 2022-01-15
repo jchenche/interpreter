@@ -25,14 +25,16 @@ binary  name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
 prefix  name fun       = Prefix (do{ reservedOp name; return fun })
 postfix name fun       = Postfix (do{ reservedOp name; return fun })
 
-term = var
-   <|> define
-   <|> try func
-   <|> cond
-   <|> loop
+term = define
    <|> lit
    <|> block
+   <|> try func
    <|> parens expr
+   <|> cond
+   <|> loop
+   <|> try call
+   <|> try assign
+   <|> var
    <?> "term"
 
 var = Var <$> identifier
@@ -82,6 +84,15 @@ loop = do
 
 block = Block <$> braces (many1 (expr <* semi))
 
+call = Call <$> identifier <*> parens (commaSep expr)
+
+assign = do
+    { i <- identifier
+    ; reserved keywordAssign
+    ; e <- expr
+    ; return $ Assign i e
+    }
+
 lit = Lit . VInt <$> integer
   <|> Lit . VChar <$> charLiteral
   <|> (Lit $ VBool True) <$ reserved keywordTrue
@@ -128,18 +139,16 @@ customDef =  P.LanguageDef {
 lexer = P.makeTokenParser customDef
 identifier  = P.identifier lexer
 integer = P.integer lexer
-symbol = P.symbol lexer
 reserved = P.reserved lexer
 semi = P.semi lexer
-semiSep = P.semiSep lexer
 commaSep = P.commaSep lexer
 parens = P.parens lexer
+brackets = P.brackets lexer
+braces = P.braces lexer
 whiteSpace = P.whiteSpace lexer
 charLiteral = P.charLiteral lexer
 stringLiteral = P.stringLiteral lexer
-brackets = P.brackets lexer
 reservedOp = P.reservedOp lexer
-braces = P.braces lexer
 
 -- Entry point
 -- parseProg = parse expr "Parse Error" "1_helloWorld"

@@ -5,32 +5,32 @@ type Env = [(String, Val)]
 data Prog = Prog [Expr]
     deriving (Show, Eq)
 
-data Expr = Var Ident
-          | Define Type Ident Expr
-          | Func Type [Param] Expr
-          | Cond Expr Expr Expr
-          | Loop Expr Expr
-          | Not Expr | Neg Expr
+data Expr = Not Expr | Neg Expr
           | Mult Expr Expr | Div Expr Expr
           | Add Expr Expr | Minus Expr Expr
           | Lesser Expr Expr | LesserEq Expr Expr | Greater Expr Expr | GreaterEq Expr Expr
           | Equal Expr Expr | NotEqual Expr Expr
           | And Expr Expr
           | Or Expr Expr
+          | Define Type Ident Expr
           | Lit Val
           | Block [Expr]
+          | Func Type [Param] Expr
+          | Cond Expr Expr Expr
+          | Loop Expr Expr
           | Call Ident [Expr]
           | Assign Ident Expr
+          | Var Ident
     deriving (Show, Eq)
 
 -- The Expr in Closure is always a Func
 data Val = VInt Integer | VChar Char | VBool Bool | VInts [Integer] | VChars [Char] | VBools [Bool] | VNull | Closure Expr Env
     deriving (Show, Eq)
 
+type Ident = String
+
 data Type = TInt | TChar | TBool | TInts | TChars | TBools | TVoid
     deriving (Show, Eq)
-
-type Ident = String
 
 data Param = Param Type Ident
     deriving (Show, Eq)
@@ -43,7 +43,7 @@ program =
             (Var "base")
             (Mult (Var "num") (Call "factorial" [Minus (Var "num") (Lit (VInt 1))])))
         )
-        , Define TInt "result" (Minus (Mult (Add (Neg (Lit (VInt 0))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VInt 5))) (Lit (VInt 6))))
+        , Define TInt "result" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VInt 5))) (Lit (VInt 6))))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
     ]
 
@@ -71,25 +71,34 @@ expr ::= "!" expr | "-" expr | "+" expr
        | expr "&&" expr
        | expr "||" expr
        | term
-term ::= var | define | func | cond | loop | lit | block | call | assign | "(" expr ")"
-var ::= ident
-ident ::= [_a-zA-Z][_a-zA-Z0-9]*
+term ::= define
+       | lit
+       | block
+       | func
+       | "(" expr ")"
+       | cond
+       | loop
+       | call
+       | assign
+       | var
 define ::= type ident "=" expr
-type ::= "int" | "char" | "bool" | "int[]" | "char[]" | "bool[]" | "void"
+lit ::= integer | character | boolean | array | string | null
+block ::= "{" (expr ";")+ "}"
 func ::= "(" params ")" "->" expr
-params ::= ( type ident ("," type ident)* ) | <empty>
 cond ::= "if" "(" expr ")" expr "else" expr
 loop ::= "while" "(" expr ")" expr
-lit ::= integer | character | boolean | array | string | null
-interger ::= \d+
-characters ::= "'" [^'] "'"
+call ::= ident "(" args ")"
+assign ::= ident "=" expr
+var ::= ident
+integer ::= \d+
+character ::= "'" [^'] "'"
 boolean ::= "true" | "false"
 array ::= "[" ( (lit ("," lit)*) | <empty> ) "]"
-string ::= "\"" [^"] "\""
+string ::= "\"" [^"]* "\""
 null ::= "null"
-block ::= "{" (expr ";")+ "}"
-call ::= ident "(" args ")"
+ident ::= [_a-zA-Z][_a-zA-Z0-9]*
+type ::= "int" | "char" | "bool" | "int[]" | "char[]" | "bool[]" | "void"
+params ::= ( type ident ("," type ident)* ) | <empty>
 args ::= ( expr ("," expr)* ) | <empty>
-assign ::= ident "=" expr
 
 -}
