@@ -119,7 +119,7 @@ customDef =  P.LanguageDef {
     P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.reservedNames = [keywordInt, keywordChar, keywordBool, keywordInts, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull],
-    P.reservedOpNames = ["not", "!" ,"~" ,"and" ,"or" ,"is" ,"isnot" ,"+" ,"-" ,"*" ,"/" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!="],
+    P.reservedOpNames = ["!" ,"*" ,"/" ,"+" ,"-" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!=", "&&", "||"],
     P.caseSensitive = True
 }
 
