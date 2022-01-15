@@ -8,7 +8,7 @@ data Expr = Var Ident
           | Func Type Ident [Param] Expr
           | Cond Expr Expr Expr
           | Loop Expr Expr
-          | Not Expr | Neg Expr | Pos Expr
+          | Not Expr | Neg Expr
           | Mult Expr Expr | Div Expr Expr
           | Add Expr Expr | Minus Expr Expr
           | Lesser Expr Expr | LesserEq Expr Expr | Greater Expr Expr | GreaterEq Expr Expr
@@ -63,7 +63,15 @@ played =
 Grammar
 
 prog ::= (expr ";")*
-expr ::= var | define | func | cond | loop | op | lit | block | call | assign | "(" expr ")"
+expr ::= "!" expr | "-" expr | "+" expr
+       | expr "*" expr | expr "/" expr
+       | expr "+" expr | expr "-" expr
+       | expr "<" expr | expr "<=" expr | expr ">" expr | expr ">=" expr
+       | expr "==" expr | expr "!=" expr
+       | expr "&&" expr
+       | expr "||" expr
+       | term
+term ::= var | define | func | cond | loop | lit | block | call | assign | "(" expr ")"
 var ::= ident
 ident ::= [_a-zA-Z][_a-zA-Z0-9]*
 define ::= type ident "=" expr
@@ -72,13 +80,6 @@ func ::= type ident "(" params ")" expr
 params ::= ( type ident ("," type ident)* ) | <empty>
 cond ::= "if" "(" expr ")" expr "else" expr
 loop ::= "while" "(" expr ")" expr
-op ::= "!" expr | "-" expr | "+" expr
-     | expr "*" expr | expr "/" expr
-     | expr "+" expr | expr "-" expr
-     | expr "<" expr | expr "<=" expr | expr ">" expr | expr ">=" expr
-     | expr "==" expr | expr "!=" expr
-     | expr "&&" expr
-     | expr "||" expr
 lit ::= integer | character | boolean | array | string | null
 interger ::= \d+
 characters ::= "'" \w+ "'"
