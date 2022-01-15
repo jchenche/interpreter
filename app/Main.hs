@@ -7,6 +7,7 @@ import Text.Parsec.String
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Expr
 
+-- Parser
 prog :: GenParser Char st Prog
 prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)
 
@@ -37,8 +38,6 @@ term = define
    <|> var
    <?> "term"
 
-var = Var <$> identifier
-
 define = do
     { t <- parseType
     ; i <- identifier
@@ -47,14 +46,18 @@ define = do
     ; return $ Define t i e
     }
 
-parseType = TInts <$ reserved keywordInts
-        <|> TChars <$ reserved keywordChars
-        <|> TBools <$ reserved keywordBools
-        <|> TInt <$ reserved keywordInt
-        <|> TChar <$ reserved keywordChar
-        <|> TBool <$ reserved keywordBool
-        <|> TVoid <$ reserved keywordVoid
-        <?> "type"
+lit = Lit . VInt <$> integer
+  <|> Lit . VChar <$> charLiteral
+  <|> (Lit $ VBool True) <$ reserved keywordTrue
+  <|> (Lit $ VBool False) <$ reserved keywordFalse
+  <|> try (Lit . VInts <$> brackets (commaSep integer))
+  <|> try (Lit . VChars <$> brackets (commaSep charLiteral))
+  <|> Lit . VBools <$> brackets (commaSep (True <$ reserved keywordTrue <|> False <$ reserved keywordFalse))
+  <|> Lit . VChars <$> stringLiteral
+  <|> Lit VNull <$ reserved keywordNull
+  <?> "literal"
+
+block = Block <$> braces (many1 (expr <* semi))
 
 -- Give void as the type for now and replace it during type-checking (maybe not needed)
 func = do
@@ -63,8 +66,6 @@ func = do
     ; e <- expr
     ; return $ Func TVoid ps e
     }
-
-params = commaSep (Param <$> parseType <*> identifier)
 
 cond = do
     { reserved keywordIf
@@ -82,8 +83,6 @@ loop = do
     ; return $ Loop condition e
     }
 
-block = Block <$> braces (many1 (expr <* semi))
-
 call = Call <$> identifier <*> parens (commaSep expr)
 
 assign = do
@@ -93,16 +92,18 @@ assign = do
     ; return $ Assign i e
     }
 
-lit = Lit . VInt <$> integer
-  <|> Lit . VChar <$> charLiteral
-  <|> (Lit $ VBool True) <$ reserved keywordTrue
-  <|> (Lit $ VBool False) <$ reserved keywordFalse
-  <|> try (Lit . VInts <$> brackets (commaSep integer))
-  <|> try (Lit . VChars <$> brackets (commaSep charLiteral))
-  <|> Lit . VBools <$> brackets (commaSep (True <$ reserved keywordTrue <|> False <$ reserved keywordFalse))
-  <|> Lit . VChars <$> stringLiteral
-  <|> Lit VNull <$ reserved keywordNull
-  <?> "literal"
+var = Var <$> identifier
+
+parseType = TInts <$ reserved keywordInts
+        <|> TChars <$ reserved keywordChars
+        <|> TBools <$ reserved keywordBools
+        <|> TInt <$ reserved keywordInt
+        <|> TChar <$ reserved keywordChar
+        <|> TBool <$ reserved keywordBool
+        <|> TVoid <$ reserved keywordVoid
+        <?> "type"
+
+params = commaSep (Param <$> parseType <*> identifier)
 
 -- Lexer
 keywordInt = "int"
@@ -152,7 +153,6 @@ reservedOp = P.reservedOp lexer
 
 -- Entry point
 -- parseProg = parse expr "Parse Error" "1_helloWorld"
-
 main :: IO ()
 main = do { result <- parseFromFile prog "test/playground.txt"
           ; case result of
