@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3c63a4cb98272291edb9b6a02851192be745fbfef7ba477c88259bda24ac9394
+-- hash: 5a0fc9ff9c7c8785a557664fafdbfafbd26875e01b7cff78e16e5e91baf8a89a
 
 name:           interpreter
 version:        0.1.0.0
@@ -29,6 +29,8 @@ library
   exposed-modules:
       AST
       Lib
+      Parser.Lexer
+      Parser.Parser
   other-modules:
       Paths_interpreter
   hs-source-dirs:
