@@ -42,7 +42,7 @@ program =
             (Var "base")
             (Mult (Var "num") (Call "factorial" [Minus (Var "num") (Lit (VInt 1))])))
         )
-        , Define TInt "result" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VInt 5))) (Lit (VInt 6))))
+        , Define TInt "result" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
         , Define TFloat "aFloat" (Lit (VFloat 1.2))
     ]

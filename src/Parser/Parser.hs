@@ -9,6 +9,7 @@ import Text.Parsec.String (GenParser)
 prog :: GenParser Char st Prog
 prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)
 
+expr :: GenParser Char st Expr
 expr = buildExpressionParser opTable term <?> "expression"
 
 opTable = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
@@ -23,6 +24,7 @@ opTable = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
 binary name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
 prefix name fun = Prefix (do{ reservedOp name; return fun })
 
+term :: GenParser Char st Expr
 term = define
    <|> lit
    <|> block
