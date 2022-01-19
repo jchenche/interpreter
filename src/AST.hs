@@ -1,6 +1,6 @@
 module AST where
 
-type Env = [(String, Val)]
+type Env = [[(String, Val)]] -- Use Map.Map
 
 data Prog = Prog [Expr]
     deriving (Show, Eq)
@@ -23,13 +23,12 @@ data Expr = Not Expr | Neg Expr
           | Var Ident
     deriving (Show, Eq)
 
--- The Expr in Closure is always a Func
-data Val = VInt Integer | VChar Char | VBool Bool | VInts [Integer] | VChars [Char] | VBools [Bool] | VNull | Closure Expr Env
+data Val = VInt Integer | VFloat Double | VChar Char | VBool Bool | VInts [Integer] | VFloats [Double] | VChars [Char] | VBools [Bool] | VNull | Closure [Param] Expr Env
     deriving (Show, Eq)
 
 type Ident = String
 
-data Type = TInt | TChar | TBool | TInts | TChars | TBools | TVoid
+data Type = TInt | TFloat | TChar | TBool | TInts | TFloats | TChars | TBools | TVoid
     deriving (Show, Eq)
 
 data Param = Param Type Ident
@@ -45,6 +44,7 @@ program =
         )
         , Define TInt "result" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VInt 5))) (Lit (VInt 6))))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
+        , Define TFloat "aFloat" (Lit (VFloat 1.2))
     ]
 
 played =
@@ -82,7 +82,7 @@ term ::= define
        | assign
        | var
 define ::= type ident "=" expr
-lit ::= integer | character | boolean | array | string | null
+lit ::= integer | float | character | boolean | array | string | null
 block ::= "{" (expr ";")+ "}"
 func ::= "(" params ")" "->" expr
 cond ::= "if" "(" expr ")" expr "else" expr
@@ -91,13 +91,14 @@ call ::= ident "(" args ")"
 assign ::= ident "=" expr
 var ::= ident
 integer ::= \d+
+float ::= \d+\.\d+
 character ::= "'" [^'] "'"
 boolean ::= "true" | "false"
 array ::= "[" ( (lit ("," lit)*) | <empty> ) "]"
 string ::= "\"" [^"]* "\""
 null ::= "null"
 ident ::= [_a-zA-Z][_a-zA-Z0-9]*
-type ::= "int" | "char" | "bool" | "int[]" | "char[]" | "bool[]" | "void"
+type ::= "int" | "float" | "char" | "bool" | "int[]" | "float[]" | "char[]" | "bool[]" | "void"
 params ::= ( type ident ("," type ident)* ) | <empty>
 args ::= ( expr ("," expr)* ) | <empty>
 

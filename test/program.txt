@@ -4,3 +4,5 @@ int factorial = (int num) -> if (num == base) base else num * factorial(num - 1)
 
 int result = (-1 + 0) * 3 - 4 * 5 * 6;
 result = factorial(5);
+
+float aFloat = 1.2;

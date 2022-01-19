@@ -43,11 +43,13 @@ define = do
     ; return $ Define t i e
     }
 
-lit = Lit . VInt <$> integer
+lit = Lit . VFloat <$> try float
+  <|> Lit . VInt <$> integer
   <|> Lit . VChar <$> charLiteral
   <|> (Lit $ VBool True) <$ reserved keywordTrue
   <|> (Lit $ VBool False) <$ reserved keywordFalse
   <|> try (Lit . VInts <$> brackets (commaSep integer))
+  <|> try (Lit . VFloats <$> brackets (commaSep float))
   <|> try (Lit . VChars <$> brackets (commaSep charLiteral))
   <|> Lit . VBools <$> brackets (commaSep (True <$ reserved keywordTrue <|> False <$ reserved keywordFalse))
   <|> Lit . VChars <$> stringLiteral
@@ -92,9 +94,11 @@ assign = do
 var = Var <$> identifier
 
 parseType = TInts <$ reserved keywordInts
+        <|> TFloats <$ reserved keywordFloats
         <|> TChars <$ reserved keywordChars
         <|> TBools <$ reserved keywordBools
         <|> TInt <$ reserved keywordInt
+        <|> TFloat <$ reserved keywordFloat
         <|> TChar <$ reserved keywordChar
         <|> TBool <$ reserved keywordBool
         <|> TVoid <$ reserved keywordVoid

@@ -4,9 +4,11 @@ import Text.Parsec
 import qualified Text.Parsec.Token as P
 
 keywordInt = "int"
+keywordFloat = "float"
 keywordChar = "char"
 keywordBool = "bool"
 keywordInts = "int[]"
+keywordFloats = "float[]"
 keywordChars = "char[]"
 keywordBools = "bool[]"
 keywordVoid = "void"
@@ -38,6 +40,7 @@ lexer = P.makeTokenParser customDef
 
 identifier  = P.identifier lexer
 integer = P.integer lexer
+float = P.float lexer
 reserved = P.reserved lexer
 reservedOp = P.reservedOp lexer
 whiteSpace = P.whiteSpace lexer
