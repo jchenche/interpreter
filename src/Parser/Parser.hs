@@ -1,7 +1,8 @@
 module Parser.Parser (prog, program, played) where
 
-import Parser.Lexer
+import AST.CommonAST
 import AST.PlainAST
+import Parser.Lexer
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.String (GenParser)

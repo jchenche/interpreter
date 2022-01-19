@@ -1,6 +1,9 @@
 module AST.PlainAST where
 
-type Env = [[(String, Val)]] -- Use Map.Map
+import AST.CommonAST
+import qualified Data.Map as Map (Map)
+
+type Env = [Map.Map String Val]
 
 data Prog = Prog [Expr]
     deriving (Show, Eq)
@@ -24,12 +27,4 @@ data Expr = Not Expr | Neg Expr
     deriving (Show, Eq)
 
 data Val = VInt Integer | VFloat Double | VChar Char | VBool Bool | VInts [Integer] | VFloats [Double] | VChars [Char] | VBools [Bool] | VNull | Closure [Param] Expr Env
-    deriving (Show, Eq)
-
-type Ident = String
-
-data Type = TInt | TFloat | TChar | TBool | TInts | TFloats | TChars | TBools | TVoid
-    deriving (Show, Eq)
-
-data Param = Param Type Ident
     deriving (Show, Eq)
