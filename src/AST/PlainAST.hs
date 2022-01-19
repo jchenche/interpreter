@@ -1,7 +1,7 @@
 module AST.PlainAST where
 
 import AST.CommonAST
-import qualified Data.Map as Map (Map)
+import qualified Data.Map.Strict as Map (Map)
 
 type Env = [Map.Map String Type]
 
