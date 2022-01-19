@@ -3,7 +3,7 @@ module AST.PlainAST where
 import AST.CommonAST
 import qualified Data.Map as Map (Map)
 
-type Env = [Map.Map String Val]
+type Env = [Map.Map String Type]
 
 data Prog = Prog [Expr]
     deriving (Show, Eq)

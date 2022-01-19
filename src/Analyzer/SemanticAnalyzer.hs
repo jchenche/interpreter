@@ -27,6 +27,8 @@ typec (PT.Not e) =
        ; return $ Not (getT typedE) typedE
        }
 
+typec _ = error "Shuoldn't be here"
+
 getT :: Expr -> Type
 getT (Not t _) = t
 getT (Neg t _) = t
