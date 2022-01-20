@@ -12,8 +12,8 @@ main =
        ; case result of
              Left err -> print err
              Right xs -> do { print $ xs == program
-                            ; print $ evalState (programTypeChecker xs) []
+                            -- ; print $ evalState (programTypeChecker xs) []
                             }
        }
 
--- Note: during evaluation, use fromIntegral
+-- Note: during evaluation, fromIntegral is useful for arithmetic involving an integer and a float. M.adjust or M.alter is useful in variable assignments.

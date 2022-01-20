@@ -1,9 +1,6 @@
 module AST.TypedAST where
 
 import AST.CommonAST
-import qualified Data.Map.Strict as Map (Map)
-
-type Env = [Map.Map String Type]
 
 data Prog = Prog [Expr]
     deriving (Show, Eq)
