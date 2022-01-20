@@ -1,5 +1,5 @@
 int x = 3;
-int identFunc = (int num) -> {
+int identFunc(int num) {
     x;
     (1 + -num) * num;
 };

@@ -11,20 +11,20 @@ expr ::= "!" expr | "-" expr | "+" expr
        | expr "&&" expr
        | expr "||" expr
        | term
-term ::= define
+term ::= func
+       | define
        | lit
        | block
-       | func
        | "(" expr ")"
        | cond
        | loop
        | call
        | assign
        | var
+func ::= type ident "(" params ")" expr
 define ::= type ident "=" expr
 lit ::= integer | float | character | boolean | array | string | null
 block ::= "{" (expr ";")+ "}"
-func ::= "(" params ")" "->" expr
 cond ::= "if" "(" expr ")" expr "else" expr
 loop ::= "while" "(" expr ")" expr
 call ::= ident "(" args ")"

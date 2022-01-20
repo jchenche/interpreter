@@ -15,10 +15,10 @@ data Expr = Not Type Expr | Neg Type Expr
           | Equal Type Expr Expr | NotEqual Type Expr Expr
           | And Type Expr Expr
           | Or Type Expr Expr
+          | Func Type Ident [Param] Expr
           | Define Type Ident Expr
           | Lit Type Val
           | Block Type [Expr]
-          | Func Type [Param] Expr
           | Cond Type Expr Expr Expr
           | Loop Type Expr Expr
           | Call Type Ident [Expr]
