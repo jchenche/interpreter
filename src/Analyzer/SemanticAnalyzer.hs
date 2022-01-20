@@ -6,14 +6,17 @@ import qualified AST.PlainAST as PT
 import AST.TypedAST
 import Control.Monad.State -- From the mtl library
 -- import Control.Monad.Trans.State -- From the transformers library
+import qualified Data.Map.Strict as Map
 
-programTypeChecker :: PT.Prog -> State Env Prog
+type StaticEnv = [Map.Map String Type]
+
+programTypeChecker :: PT.Prog -> State StaticEnv Prog
 programTypeChecker (PT.Prog (e:es)) =
     do { typedE <- typec e
        ; return $ Prog [typedE]
     }
 
-typec :: PT.Expr -> State Env Expr -- TODO
+typec :: PT.Expr -> State StaticEnv Expr -- TODO
 typec (PT.Var i) = return $ Var TVoid i
 
 typec (PT.Define t i e) = -- TODO
