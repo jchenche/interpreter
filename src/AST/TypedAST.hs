@@ -15,7 +15,7 @@ data Expr = Not Type Expr | Neg Type Expr
           | Equal Type Expr Expr | NotEqual Type Expr Expr
           | And Type Expr Expr
           | Or Type Expr Expr
-          | Func Type Ident [Param] Expr
+          | Func Type Type Ident [Param] Expr -- First Type is the signature
           | Define Type Ident Expr
           | Lit Type Val
           | Block Type [Expr]

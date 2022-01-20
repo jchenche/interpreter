@@ -6,8 +6,8 @@ int identFunc(int num) {
 
 bool[] conds = [true, true, false, true];
 while (true)
-    if (true) 1 + -(if (true) x else x) * num
-    else false;
+    if (true) 1 + -(if (true) x else x) * x
+    else 3;
 
 char[] greet = "hello world";
 null;

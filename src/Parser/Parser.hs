@@ -1,4 +1,4 @@
-module Parser.Parser (prog, program, played) where
+module Parser.Parser (prog, program, playground) where
 
 import AST.CommonAST
 import AST.PlainAST
@@ -116,16 +116,17 @@ program =
             (Cond (Equal (Var "num") (Var "base"))
             (Var "base")
             (Mult (Var "num") (Call "factorial" [Minus (Var "num") (Lit (VInt 1))])))
-        , Define TInt "result" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
+        , Define TFloat "aFloat" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
+        , Define TInt "result" (Lit (VInt 10000000))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
-        , Define TFloat "aFloat" (Lit (VFloat 1.2))
     ]
 
-played =
+playground :: Prog
+playground =
     Prog [Define TInt "x" (Lit (VInt 3))
-        , Func TInt "identFunc" [Param TInt "num"] (Block [Var "x",Mult (Add (Lit (VInt 1)) (Neg (Var "num"))) (Var "num")])
+        , Func TInt "identFunc" [Param TInt "num"] (Block [Var "x", Mult (Add (Lit (VInt 1)) (Neg (Var "num"))) (Var "num")])
         , Define TBools "conds" (Lit (VBools [True,True,False,True]))
-        , Loop (Lit (VBool True)) (Cond (Lit (VBool True)) (Add (Lit (VInt 1)) (Mult (Neg (Cond (Lit (VBool True)) (Var "x") (Var "x"))) (Var "num"))) (Lit (VBool False)))
+        , Loop (Lit (VBool True)) (Cond (Lit (VBool True)) (Add (Lit (VInt 1)) (Mult (Neg (Cond (Lit (VBool True)) (Var "x") (Var "x"))) (Var "x"))) (Lit (VInt 3)))
         , Define TChars "greet" (Lit (VChars "hello world"))
         , Lit VNull
     ]

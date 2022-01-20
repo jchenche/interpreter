@@ -50,9 +50,31 @@ getT (Or t _ _) = t
 getT (Define t _ _) = t
 getT (Lit t _) = t
 getT (Block t _) = t
-getT (Func t _ _ _) = t
+getT (Func t _ _ _ _) = t
 getT (Cond t _ _ _) = t
 getT (Loop t _ _) = t
 getT (Call t _ _) = t
 getT (Assign t _ _) = t
 getT (Var t _) = t
+
+typedProgram :: Prog
+typedProgram =
+    Prog [Define TInt "base" (Lit TInt (VInt 1))
+        , Func (Sig TInt [TInt]) TInt "factorial" [Param TInt "num"] 
+            (Cond TInt (Equal TBool (Var TInt "num") (Var TInt "base"))
+            (Var TInt "base")
+            (Mult TInt (Var TInt "num") (Call TInt "factorial" [Minus TInt (Var TInt "num") (Lit TInt (VInt 1))])))
+        , Define TFloat "aFloat" (Minus TFloat (Mult TInt (Add TInt (Neg TInt (Lit TInt (VInt 1))) (Lit TInt (VInt 0))) (Lit TInt (VInt 3))) (Mult TFloat (Mult TFloat (Lit TInt (VInt 4)) (Lit TFloat (VFloat 5.1))) (Lit TInt (VInt 6))))
+        , Define TInt "result" (Lit TInt (VInt 10000000))
+        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])
+    ]
+
+typedPlayground :: Prog
+typedPlayground =
+    Prog [Define TInt "x" (Lit TInt (VInt 3))
+        , Func (Sig TInt [TInt]) TInt "identFunc" [Param TInt "num"] (Block TInt [Var TInt "x", Mult TInt (Add TInt (Lit TInt (VInt 1)) (Neg TInt (Var TInt "num"))) (Var TInt "num")])
+        , Define TBools "conds" (Lit TBools (VBools [True,True,False,True]))
+        , Loop TVoid (Lit TBool (VBool True)) (Cond TInt (Lit TBool (VBool True)) (Add TInt (Lit TInt (VInt 1)) (Mult TInt (Neg TInt (Cond TInt (Lit TBool (VBool True)) (Var TInt "x") (Var TInt "x"))) (Var TInt "x"))) (Lit TInt (VInt 3)))
+        , Define TChars "greet" (Lit TChars (VChars "hello world"))
+        , Lit TVoid VNull
+    ]
