@@ -3,7 +3,7 @@ module AST.TypedAST where
 import AST.CommonAST
 import qualified Data.Map.Strict as M (Map)
 
-type DynamicEnv = [M.Map String Val]
+type DynamicEnv = [M.Map Ident Val]
 
 data Prog = Prog [Expr]
     deriving (Show, Eq)

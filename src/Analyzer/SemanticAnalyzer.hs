@@ -5,32 +5,86 @@ import AST.CommonAST
 import qualified AST.PlainAST as PT
 import AST.TypedAST
 import Control.Monad.State -- From the mtl library
+import Control.Monad.Identity
 -- import Control.Monad.Trans.State -- From the transformers library
 import qualified Data.Map.Strict as M
 
-type StaticEnv = [M.Map String Type]
+type StaticEnv = [M.Map Ident Type]
 
-programTypeChecker :: PT.Prog -> State StaticEnv Prog
+programTypeChecker :: PT.Prog -> StateT StaticEnv Identity Prog
 programTypeChecker (PT.Prog es) =
-    do { typedEs <- mapM (\e -> typec e) es
+    do { pushScope
+       ; typedEs <- mapM (\e -> typec e) es
        ; return $ Prog typedEs
        }
 
-typec :: PT.Expr -> State StaticEnv Expr -- TODO
+typec :: PT.Expr -> StateT StaticEnv Identity Expr -- TODO
 typec (PT.Var i) = return $ Var TVoid i
 
-typec (PT.Define t i e) = -- TODO
+typec (PT.Define declaredType ident e) =
     do { typedE <- typec e
        ; env <- get
-       ; return $ Define t i typedE
+       ; if declaredType /= (getT typedE)
+             then error "[TODO Change error handling] Type mismatch"
+         else if inTopScope ident env
+             then error "[TODO Change error handling] Redefinition error"
+             else do { storeVariable ident (getT typedE) env
+                     ; return $ Define declaredType ident typedE
+                     }
        }
 
-typec (PT.Not e) = 
+typec (PT.Not e) =
     do { typedE <- typec e
        ; return $ Not (getT typedE) typedE
        }
 
-typec _ = error "Shuoldn't be here"
+typec (PT.Lit e) =
+    case e of
+        PT.VInt v        -> return $Lit TInt (VInt v)
+        PT.VFloat v      -> return $Lit TFloat (VFloat v)
+        PT.VChar v       -> return $Lit TChar (VChar v)
+        PT.VBool v       -> return $Lit TBool (VBool v)
+        PT.VInts v       -> return $Lit TInts (VInts v)
+        PT.VFloats v     -> return $Lit TFloats (VFloats v)
+        PT.VChars v      -> return $Lit TChars (VChars v)
+        PT.VBools v      -> return $Lit TBools (VBools v)
+        PT.VNull         -> return $Lit TVoid VNull
+        PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking"
+
+typec _ = error "Illegal State: Shouldn't be here!"
+
+-- Search if an identifier exists in the environment starting at the top scope
+inScope :: Ident -> StaticEnv -> Bool
+inScope ident []             = False
+inScope ident (scope:scopes)
+    | ident `M.member` scope = True
+    | otherwise              = inScope ident scopes
+
+-- Search if an identifier exists in the current scope
+inTopScope :: Ident -> StaticEnv -> Bool
+inTopScope ident []        = False
+inTopScope ident (scope:_) = ident `M.member` scope
+
+storeVariable :: Ident -> Type -> StaticEnv -> StateT StaticEnv Identity ()
+storeVariable ident t (scope:scopes) = put (M.insert ident t scope:scopes)
+storeVariable _ _ [] = error "Illegal State: Storing variable to empty environment"
+
+
+-- Push a new scope to the top
+pushScope :: StateT StaticEnv Identity ()
+pushScope =
+    do { env <- get
+       ; put (M.empty:env)
+       }
+
+-- Pop the scope at the top
+popScope :: StateT StaticEnv Identity ()
+popScope =
+    do { env <- get
+       ; case env of
+             [] -> error "Illegal State: Popping a scope from an empty environment!"
+             (_:scopes) -> put scopes
+       }
 
 getT :: Expr -> Type
 getT (Not t _) = t
@@ -56,6 +110,13 @@ getT (Loop t _ _) = t
 getT (Call t _ _) = t
 getT (Assign t _ _) = t
 getT (Var t _) = t
+
+typedSimple = (Prog [Define TInt "x" (Lit TInt (VInt 1))
+                   , Define TFloat "y" (Lit TFloat (VFloat 2.0))
+                   , Not TVoid (Var TVoid "x")
+                   , Var TVoid "y"
+                    ]
+            , [M.fromList [("x",TInt),("y",TFloat)]])
 
 typedProgram :: Prog
 typedProgram =
