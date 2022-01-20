@@ -12,7 +12,7 @@ main =
        ; case result of
              Left err -> print err
              Right xs -> do { print $ xs == program
-                            -- ; print $ evalState (programTypeChecker xs) []
+                            ; print $ evalState (programTypeChecker xs) []
                             }
        }
 

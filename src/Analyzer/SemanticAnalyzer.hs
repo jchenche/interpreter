@@ -11,10 +11,10 @@ import qualified Data.Map.Strict as Map
 type StaticEnv = [Map.Map String Type]
 
 programTypeChecker :: PT.Prog -> State StaticEnv Prog
-programTypeChecker (PT.Prog (e:es)) =
-    do { typedE <- typec e
-       ; return $ Prog [typedE]
-    }
+programTypeChecker (PT.Prog es) =
+    do { typedEs <- mapM (\e -> typec e) es
+       ; return $ Prog typedEs
+       }
 
 typec :: PT.Expr -> State StaticEnv Expr -- TODO
 typec (PT.Var i) = return $ Var TVoid i
