@@ -40,15 +40,15 @@ typec (PT.Not e) =
 
 typec (PT.Lit e) =
     case e of
-        PT.VInt v        -> return $Lit TInt (VInt v)
-        PT.VFloat v      -> return $Lit TFloat (VFloat v)
-        PT.VChar v       -> return $Lit TChar (VChar v)
-        PT.VBool v       -> return $Lit TBool (VBool v)
-        PT.VInts v       -> return $Lit TInts (VInts v)
-        PT.VFloats v     -> return $Lit TFloats (VFloats v)
-        PT.VChars v      -> return $Lit TChars (VChars v)
-        PT.VBools v      -> return $Lit TBools (VBools v)
-        PT.VNull         -> return $Lit TVoid VNull
+        PT.VInt v        -> return $ Lit TInt (VInt v)
+        PT.VFloat v      -> return $ Lit TFloat (VFloat v)
+        PT.VChar v       -> return $ Lit TChar (VChar v)
+        PT.VBool v       -> return $ Lit TBool (VBool v)
+        PT.VInts v       -> return $ Lit TInts (VInts v)
+        PT.VFloats v     -> return $ Lit TFloats (VFloats v)
+        PT.VChars v      -> return $ Lit TChars (VChars v)
+        PT.VBools v      -> return $ Lit TBools (VBools v)
+        PT.VNull         -> return $ Lit TVoid VNull
         PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking"
 
 typec _ = error "Illegal State: Shouldn't be here!"
