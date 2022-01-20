@@ -18,19 +18,25 @@ programTypeChecker (PT.Prog es) =
        ; return $ Prog typedEs
        }
 
-typec :: PT.Expr -> StateT StaticEnv Identity Expr -- TODO
-typec (PT.Var i) = return $ Var TVoid i
+typec :: PT.Expr -> StateT StaticEnv Identity Expr
+typec (PT.Var ident) =
+    do { env <- get
+       ; case inScope ident env of
+             Nothing -> error "[TODO Change error handling] Identifier not in scope"
+             Just t  -> return $ Var t ident
+       }
 
 typec (PT.Define declaredType ident e) =
     do { typedE <- typec e
-       ; env <- get
        ; if declaredType /= (getT typedE)
-             then error "[TODO Change error handling] Type mismatch"
-         else if inTopScope ident env
-             then error "[TODO Change error handling] Redefinition error"
-             else do { storeVariable ident (getT typedE) env
-                     ; return $ Define declaredType ident typedE
-                     }
+         then error "[TODO Change error handling] Type mismatch"
+         else do { env <- get
+                 ; case inTopScope ident env of
+                       Just _  -> error "[TODO Change error handling] Redefinition error"
+                       Nothing -> do { storeVariable ident declaredType env
+                                     ; return $ Define declaredType ident typedE
+                                     }
+                 }
        }
 
 typec (PT.Not e) =
@@ -53,18 +59,22 @@ typec (PT.Lit e) =
 
 typec _ = error "Illegal State: Shouldn't be here!"
 
--- Search if an identifier exists in the environment starting at the top scope
-inScope :: Ident -> StaticEnv -> Bool
-inScope ident []             = False
-inScope ident (scope:scopes)
-    | ident `M.member` scope = True
-    | otherwise              = inScope ident scopes
+-- Extract type of identifier from the environment starting from the inner most/top scope,
+-- stopping when you encounter one (this allows variable shadowing),
+-- returning Nothing if it's absent
+inScope :: Ident -> StaticEnv -> Maybe Type
+inScope ident []             = Nothing
+inScope ident (scope:scopes) =
+    case ident `M.lookup` scope of
+        Nothing -> inScope ident scopes
+        t       -> t
 
--- Search if an identifier exists in the current scope
-inTopScope :: Ident -> StaticEnv -> Bool
-inTopScope ident []        = False
-inTopScope ident (scope:_) = ident `M.member` scope
+-- Extract type of identifier from the top scope, return Nothing if it's absent
+inTopScope :: Ident -> StaticEnv -> Maybe Type
+inTopScope ident []        = Nothing
+inTopScope ident (scope:_) = ident `M.lookup` scope
 
+-- Store identifier with a type in the environment
 storeVariable :: Ident -> Type -> StaticEnv -> StateT StaticEnv Identity ()
 storeVariable ident t (scope:scopes) = put (M.insert ident t scope:scopes)
 storeVariable _ _ [] = error "Illegal State: Storing variable to empty environment"
@@ -111,12 +121,12 @@ getT (Call t _ _) = t
 getT (Assign t _ _) = t
 getT (Var t _) = t
 
-typedSimple = (Prog [Define TInt "x" (Lit TInt (VInt 1))
-                   , Define TFloat "y" (Lit TFloat (VFloat 2.0))
-                   , Not TVoid (Var TVoid "x")
-                   , Var TVoid "y"
-                    ]
-            , [M.fromList [("x",TInt),("y",TFloat)]])
+typedSimple =
+    (Prog [Define TInt "x" (Lit TInt (VInt 1))
+         , Define TFloat "y" (Lit TFloat (VFloat 2.0))
+         , Not TInt (Var TInt "x")
+         , Var TFloat "y"]
+   , [M.fromList [("x",TInt),("y",TFloat)]])
 
 typedProgram :: Prog
 typedProgram =

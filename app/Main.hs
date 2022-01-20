@@ -13,6 +13,7 @@ main =
              Left err -> print err
              Right xs -> do { print $ xs == program
                             ; print $ runState (programTypeChecker xs) []
+                            ; print $ typedSimple == runState (programTypeChecker xs) []
                             }
        }
 
