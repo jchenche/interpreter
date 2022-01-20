@@ -6,9 +6,9 @@ import qualified AST.PlainAST as PT
 import AST.TypedAST
 import Control.Monad.State -- From the mtl library
 -- import Control.Monad.Trans.State -- From the transformers library
-import qualified Data.Map.Strict as Map
+import qualified Data.Map.Strict as M
 
-type StaticEnv = [Map.Map String Type]
+type StaticEnv = [M.Map String Type]
 
 programTypeChecker :: PT.Prog -> State StaticEnv Prog
 programTypeChecker (PT.Prog es) =

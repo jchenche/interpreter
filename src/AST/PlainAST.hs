@@ -1,9 +1,9 @@
 module AST.PlainAST where
 
 import AST.CommonAST
-import qualified Data.Map.Strict as Map (Map)
+import qualified Data.Map.Strict as M (Map)
 
-type DynamicEnv = [Map.Map String Val]
+type DynamicEnv = [M.Map String Val]
 
 data Prog = Prog [Expr]
     deriving (Show, Eq)
