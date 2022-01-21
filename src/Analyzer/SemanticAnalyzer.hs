@@ -9,6 +9,17 @@ import Control.Monad.State -- From the mtl library
 import Control.Monad.Except
 import qualified Data.Map.Strict as M
 
+data SemanticError = TypeMismatch Type Type
+                   | VarNotInScope Ident
+                   | FuncNotInScope Ident
+                   | VarConflict Ident
+                   | FuncConflict Ident
+    deriving Eq
+
+instance Show SemanticError where
+    show (TypeMismatch t1 t2) = show t1 ++ "doesn't match" ++ show t2
+    show _ = "[TODO] Error, refine later"
+
 type StaticEnv = [M.Map Ident Type]
 
 -- If I have StateT as the top of the monad transformer stack,
@@ -16,7 +27,7 @@ type StaticEnv = [M.Map Ident Type]
 -- But if I have ExceptT as the top of the monad transformer stack,
 -- I get a pair of error and state in case of an exception.
 -- I chose the latter since looking at the environment in case of an exception is a plus
-type TypeChecker = ExceptT ProgramError (State StaticEnv)
+type TypeChecker = ExceptT SemanticError (State StaticEnv)
 
 -- temp :: PT.Prog -> TypeChecker Prog
 -- temp (PT.Prog es) =

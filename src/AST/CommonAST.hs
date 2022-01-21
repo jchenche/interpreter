@@ -8,14 +8,3 @@ data Type = TInt | TFloat | TChar | TBool | TInts | TFloats | TChars | TBools | 
 
 data Param = Param Type Ident
     deriving (Show, Eq)
-
-data ProgramError = TypeMismatch Type Type
-                  | VarNotInScope Ident
-                  | FuncNotInScope Ident
-                  | VarConflict Ident
-                  | FuncConflict Ident
-    deriving Eq
-
-instance Show ProgramError where
-    show (TypeMismatch t1 t2) = show t1 ++ "doesn't match" ++ show t2
-    show _ = "[TODO] Error, refine later"
