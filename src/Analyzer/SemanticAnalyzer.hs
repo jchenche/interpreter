@@ -44,6 +44,15 @@ typec (PT.Not e) =
        ; return $ Not (getT typedE) typedE
        }
 
+typec (PT.Block es) = 
+    do { pushScope
+       ; typedEs <- mapM (\e -> typec e) es
+       ; popScope
+       ; if null typedEs
+         then error "Illegal State: Block expressions must contain at least one expression"
+       ; else return $ Block (getT $ last typedEs) typedEs
+       }
+
 typec (PT.Lit e) =
     case e of
         PT.VInt v        -> return $ Lit TInt (VInt v)
