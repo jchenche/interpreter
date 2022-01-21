@@ -4,10 +4,9 @@ module Analyzer.SemanticAnalyzer where
 import AST.CommonAST
 import qualified AST.PlainAST as PT
 import AST.TypedAST
-import Control.Monad.State -- From the mtl library
-import Control.Monad.Identity
-import Control.Monad.Except
 -- import Control.Monad.Trans.State -- From the transformers library
+import Control.Monad.State -- From the mtl library
+import Control.Monad.Except
 import qualified Data.Map.Strict as M
 
 type StaticEnv = [M.Map Ident Type]
@@ -17,40 +16,40 @@ type StaticEnv = [M.Map Ident Type]
 -- But if I have ExceptT as the top of the monad transformer stack,
 -- I get a pair of error and state in case of an exception.
 -- I chose the latter since looking at the environment in case of an exception is a plus
-type TypeChecker = ExceptT ErrorMsg (StateT StaticEnv IO)
+type TypeChecker = ExceptT ProgramError (State StaticEnv)
 
-temp :: PT.Prog -> TypeChecker Prog
-temp (PT.Prog es) =
-    do {
-         env <- get
-       ; lift $ lift $ print "hi"
-       ; put (M.empty:env)
-       ; throwError (FuncNotInScope "hello")
-       ; return $ Prog [Lit TInt (VInt 3)]
-       }
+-- temp :: PT.Prog -> TypeChecker Prog
+-- temp (PT.Prog es) =
+--     do {
+--          env <- get
+--     --    ; lift $ lift $ print "hi"
+--        ; put (M.empty:env)
+--        ; throwError (FuncNotInScope "hello")
+--        ; return $ Prog [Lit TInt (VInt 3)]
+--        }
 
-programTypeChecker :: PT.Prog -> StateT StaticEnv Identity Prog
+programTypeChecker :: PT.Prog -> TypeChecker Prog
 programTypeChecker (PT.Prog es) =
     do { pushScope
        ; typedEs <- mapM (\e -> typec e) es
        ; return $ Prog typedEs
        }
 
-typec :: PT.Expr -> StateT StaticEnv Identity Expr
+typec :: PT.Expr -> TypeChecker Expr
 typec (PT.Var ident) =
     do { env <- get
        ; case inScope ident env of
-             Nothing -> error "[TODO Change error handling] Identifier not in scope"
+             Nothing -> throwError $ VarNotInScope ident
              Just t  -> return $ Var t ident
        }
 
 typec (PT.Define declaredType ident e) =
     do { typedE <- typec e
-       ; if declaredType /= (getT typedE)
-         then error "[TODO Change error handling] Type mismatch"
+       ; if declaredType /= getT typedE
+         then throwError $ TypeMismatch declaredType (getT typedE)
          else do { env <- get
                  ; case inTopScope ident env of
-                       Just _  -> error "[TODO Change error handling] Redefinition error"
+                       Just _  -> throwError $ VarConflict ident
                        Nothing -> do { storeVariable ident declaredType env
                                      ; return $ Define declaredType ident typedE
                                      }
@@ -102,20 +101,20 @@ inTopScope ident []        = Nothing
 inTopScope ident (scope:_) = ident `M.lookup` scope
 
 -- Store identifier with a type in the environment
-storeVariable :: Ident -> Type -> StaticEnv -> StateT StaticEnv Identity ()
+storeVariable :: Ident -> Type -> StaticEnv -> TypeChecker ()
 storeVariable ident t (scope:scopes) = put (M.insert ident t scope:scopes)
 storeVariable _ _ [] = error "Illegal State: Storing variable to empty environment"
 
 
 -- Push a new scope to the top
-pushScope :: StateT StaticEnv Identity ()
+pushScope :: TypeChecker ()
 pushScope =
     do { env <- get
        ; put (M.empty:env)
        }
 
 -- Pop the scope at the top
-popScope :: StateT StaticEnv Identity ()
+popScope :: TypeChecker ()
 popScope =
     do { env <- get
        ; case env of
@@ -149,10 +148,10 @@ getT (Assign t _ _) = t
 getT (Var t _) = t
 
 typedSimple =
-    (Prog [Define TInt "x" (Lit TInt (VInt 1))
+    (Right (Prog [Define TInt "x" (Lit TInt (VInt 1))
          , Define TFloat "y" (Lit TFloat (VFloat 2.0))
          , Not TInt (Var TInt "x")
-         , Var TFloat "y"]
+         , Var TFloat "y"])
    , [M.fromList [("x",TInt),("y",TFloat)]])
 
 typedProgram :: Prog

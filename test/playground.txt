@@ -11,5 +11,3 @@ while (true)
 
 char[] greet = "hello world";
 null;
-
-/* TODO: define array access and modification and maybe add an "=" to functions */
