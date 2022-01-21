@@ -3,7 +3,8 @@ module Main where
 import Parser.Parser
 import Text.Parsec.String (parseFromFile)
 import Analyzer.SemanticAnalyzer
-import Control.Monad.State (runState)
+import Control.Monad.State (runState, runStateT)
+import Control.Monad.Except (runExcept, runExceptT)
 
 -- parseProg = parse expr "Parse Error" "1_helloWorld"
 main :: IO ()
@@ -12,8 +13,9 @@ main =
        ; case result of
              Left err -> print err
              Right xs -> do { print $ xs == program
-                            ; print $ runState (programTypeChecker xs) []
-                            ; print $ typedSimple == runState (programTypeChecker xs) []
+                            ; typed <- runStateT (runExceptT (temp xs)) []
+                            ; print typed
+                            -- ; print $ typedSimple == runState (programTypeChecker xs) []
                             }
        }
 

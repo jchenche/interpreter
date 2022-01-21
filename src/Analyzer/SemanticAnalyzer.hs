@@ -6,10 +6,28 @@ import qualified AST.PlainAST as PT
 import AST.TypedAST
 import Control.Monad.State -- From the mtl library
 import Control.Monad.Identity
+import Control.Monad.Except
 -- import Control.Monad.Trans.State -- From the transformers library
 import qualified Data.Map.Strict as M
 
 type StaticEnv = [M.Map Ident Type]
+
+-- If I have StateT as the top of the monad transformer stack,
+-- I only get an error in case of an exception.
+-- But if I have ExceptT as the top of the monad transformer stack,
+-- I get a pair of error and state in case of an exception.
+-- I chose the latter since looking at the environment in case of an exception is a plus
+type TypeChecker = ExceptT ErrorMsg (StateT StaticEnv IO)
+
+temp :: PT.Prog -> TypeChecker Prog
+temp (PT.Prog es) =
+    do {
+         env <- get
+       ; lift $ lift $ print "hi"
+       ; put (M.empty:env)
+       ; throwError (FuncNotInScope "hello")
+       ; return $ Prog [Lit TInt (VInt 3)]
+       }
 
 programTypeChecker :: PT.Prog -> StateT StaticEnv Identity Prog
 programTypeChecker (PT.Prog es) =
