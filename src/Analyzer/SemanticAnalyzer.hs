@@ -1,12 +1,12 @@
 -- {-# OPTIONS_GHC -Wall #-}
-module Analyzer.SemanticAnalyzer where
+module Analyzer.SemanticAnalyzer (typeCheckAST, typedProgram, typedPlayground) where
 
 import AST.CommonAST
 import qualified AST.PlainAST as PT -- PT stands for plain tree
 import AST.TypedAST
 -- import Control.Monad.Trans.State -- From the transformers library
-import Control.Monad.State -- From the mtl library
-import Control.Monad.Except
+import Control.Monad.State (State, runState, put, get) -- From the mtl library
+import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import qualified Data.Map.Strict as M
 
 data SemanticError = TypeMismatch Type Type
@@ -72,29 +72,29 @@ typec (PT.Neg e) =
          else return $ Neg operandType typedE
        }
 
-typec (PT.Mult e1 e2) = typecheckArith e1 e2 Mult
+typec (PT.Mult e1 e2) = arithTypeChecker e1 e2 Mult
 
-typec (PT.Div e1 e2) = typecheckArith e1 e2 Div
+typec (PT.Div e1 e2) = arithTypeChecker e1 e2 Div
 
-typec (PT.Plus e1 e2) = typecheckArith e1 e2 Plus
+typec (PT.Plus e1 e2) = arithTypeChecker e1 e2 Plus
 
-typec (PT.Minus e1 e2) = typecheckArith e1 e2 Minus
+typec (PT.Minus e1 e2) = arithTypeChecker e1 e2 Minus
 
-typec (PT.Lesser e1 e2) = typecheckComp e1 e2 Lesser
+typec (PT.Lesser e1 e2) = compTypeChecker e1 e2 Lesser
 
-typec (PT.LesserEq e1 e2) = typecheckComp e1 e2 LesserEq
+typec (PT.LesserEq e1 e2) = compTypeChecker e1 e2 LesserEq
 
-typec (PT.Greater e1 e2) = typecheckComp e1 e2 Greater
+typec (PT.Greater e1 e2) = compTypeChecker e1 e2 Greater
 
-typec (PT.GreaterEq e1 e2) = typecheckComp e1 e2 GreaterEq
+typec (PT.GreaterEq e1 e2) = compTypeChecker e1 e2 GreaterEq
 
-typec (PT.Equal e1 e2) = typecheckComp e1 e2 Equal
+typec (PT.Equal e1 e2) = compTypeChecker e1 e2 Equal
 
-typec (PT.NotEqual e1 e2) = typecheckComp e1 e2 NotEqual
+typec (PT.NotEqual e1 e2) = compTypeChecker e1 e2 NotEqual
 
-typec (PT.And e1 e2) = typecheckLogic e1 e2 And
+typec (PT.And e1 e2) = logicTypeChecker e1 e2 And
 
-typec (PT.Or e1 e2) = typecheckLogic e1 e2 Or
+typec (PT.Or e1 e2) = logicTypeChecker e1 e2 Or
 
 typec (PT.Func returnType ident params body) =
     do { env <- get
@@ -201,8 +201,8 @@ typec (PT.Var ident) =
              Just t         -> return $ Var t ident
        }
 
-typecheckArith :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
-typecheckArith e1 e2 operator =
+arithTypeChecker :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
+arithTypeChecker e1 e2 operator =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; let leftType = getT typedE1
@@ -219,8 +219,8 @@ typecheckArith e1 e2 operator =
          else return $ operator resultType typedE1 typedE2
        }
 
-typecheckComp :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
-typecheckComp e1 e2 operator =
+compTypeChecker :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
+compTypeChecker e1 e2 operator =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; let leftType = getT typedE1
@@ -237,8 +237,8 @@ typecheckComp e1 e2 operator =
          else return $ operator TBool typedE1 typedE2
        }
 
-typecheckLogic :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
-typecheckLogic e1 e2 operator =
+logicTypeChecker :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
+logicTypeChecker e1 e2 operator =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; if getT typedE1 /= TBool || getT typedE2 /= TBool

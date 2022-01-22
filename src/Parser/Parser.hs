@@ -1,11 +1,15 @@
-module Parser.Parser (prog, program, playground) where
+module Parser.Parser (parseSource, program, playground) where
 
 import AST.CommonAST
 import AST.PlainAST
 import Parser.Lexer
 import Text.Parsec
 import Text.Parsec.Expr
-import Text.Parsec.String (GenParser)
+import Text.Parsec.String (GenParser, parseFromFile)
+import Text.Parsec.Error (ParseError)
+
+parseSource :: String -> IO (Either ParseError Prog)
+parseSource sourceFile = parseFromFile prog sourceFile
 
 prog :: GenParser Char st Prog
 prog = Prog <$> (whiteSpace *> many (expr <* semi) <* eof)

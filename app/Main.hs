@@ -1,13 +1,12 @@
 module Main where
 
 import Parser.Parser
-import Text.Parsec.String (parseFromFile)
 import Analyzer.SemanticAnalyzer
 
 -- parseProg = parse expr "Parse Error" "1_helloWorld"
 main :: IO ()
 main =
-    do { result <- parseFromFile prog "test/program.txt"
+    do { result <- parseSource "test/program.txt"
        ; case result of
              Left err  -> print err
              Right ast -> do { print $ "Match AST: " ++ show (ast == program)
