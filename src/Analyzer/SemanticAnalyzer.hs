@@ -143,6 +143,15 @@ typec (PT.Cond e1 e2 e3) =
                  }
        }
 
+typec (PT.Loop e body) =
+    do { typedE <- typec e
+       ; if getT typedE /= TBool
+         then throwError $ ExprIsNotBool (getT typedE)
+         else do { typedBody <- typec body
+                 ; return $ Loop TVoid typedE typedBody
+                 }
+       }
+
 typec _ = error "Illegal State: Shouldn't be here!"
 
 -- Extract type of identifier from the environment starting from the inner most/top scope,
