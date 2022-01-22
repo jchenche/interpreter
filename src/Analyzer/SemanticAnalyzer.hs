@@ -35,16 +35,6 @@ type StaticEnv = [M.Map Ident Type]
 -- I chose the latter since looking at the environment in case of an exception is a plus
 type TypeChecker = ExceptT SemanticError (State StaticEnv)
 
--- temp :: PT.Prog -> TypeChecker Prog
--- temp (PT.Prog es) =
---     do {
---          env <- get
---     --    ; lift $ lift $ print "hi"
---        ; put (M.empty:env)
---        ; throwError (FuncNotInScope "hello")
---        ; return $ Prog [Lit TInt (VInt 3)]
---        }
-
 typeCheckAST :: PT.Prog -> (Either SemanticError Prog, StaticEnv)
 typeCheckAST ast = runState (runExceptT (programTypeChecker ast)) []
 
