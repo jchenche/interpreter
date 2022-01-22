@@ -2,7 +2,7 @@
 module Analyzer.SemanticAnalyzer where
 
 import AST.CommonAST
-import qualified AST.PlainAST as PT
+import qualified AST.PlainAST as PT -- PT stands for plain tree
 import AST.TypedAST
 -- import Control.Monad.Trans.State -- From the transformers library
 import Control.Monad.State -- From the mtl library
@@ -71,6 +71,30 @@ typec (PT.Neg e) =
          then throwError $ ExprIsNotNum operandType
          else return $ Neg operandType typedE
        }
+
+typec (PT.Mult e1 e2) = typecheckArith e1 e2 Mult
+
+typec (PT.Div e1 e2) = typecheckArith e1 e2 Div
+
+typec (PT.Add e1 e2) = typecheckArith e1 e2 Add
+
+typec (PT.Minus e1 e2) = typecheckArith e1 e2 Minus
+
+typec (PT.Lesser e1 e2) = typecheckComp e1 e2 Lesser
+
+typec (PT.LesserEq e1 e2) = typecheckComp e1 e2 LesserEq
+
+typec (PT.Greater e1 e2) = typecheckComp e1 e2 Greater
+
+typec (PT.GreaterEq e1 e2) = typecheckComp e1 e2 GreaterEq
+
+typec (PT.Equal e1 e2) = typecheckComp e1 e2 Equal
+
+typec (PT.NotEqual e1 e2) = typecheckComp e1 e2 NotEqual
+
+typec (PT.And e1 e2) = typecheckLogic e1 e2 And
+
+typec (PT.Or e1 e2) = typecheckLogic e1 e2 Or
 
 typec (PT.Func returnType ident params body) =
     do { env <- get
@@ -177,6 +201,51 @@ typec (PT.Var ident) =
              Just t         -> return $ Var t ident
        }
 
+typecheckArith :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
+typecheckArith e1 e2 operator =
+    do { typedE1 <- typec e1
+       ; typedE2 <- typec e2
+       ; let leftType = getT typedE1
+       ; let rightType = getT typedE2
+       ; let resultType = case (leftType, rightType) of
+                              (TInt, TInt)     -> TInt
+                              (TFloat, TFloat) -> TFloat
+                              (TInt, TFloat)   -> TFloat
+                              (TFloat, TInt)   -> TFloat
+                              (TChars, TChars) -> TChars
+                              _                -> TVoid
+       ; if resultType == TVoid
+       ; then throwError $ OperandTypeError leftType rightType
+       ; else return $ operator resultType typedE1 typedE2
+       }
+
+typecheckComp :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
+typecheckComp e1 e2 operator =
+    do { typedE1 <- typec e1
+       ; typedE2 <- typec e2
+       ; let leftType = getT typedE1
+       ; let rightType = getT typedE2
+       ; let resultType = case (leftType, rightType) of
+                              (TInt, TInt)     -> TBool
+                              (TFloat, TFloat) -> TBool
+                              (TChar, TChar)   -> TBool
+                              (TBool, TBool)   -> TBool
+                              (TChars, TChars) -> TBool
+                              _                -> TVoid
+       ; if resultType /= TBool
+       ; then throwError $ OperandTypeError leftType rightType
+       ; else return $ operator TBool typedE1 typedE2
+       }
+
+typecheckLogic :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
+typecheckLogic e1 e2 operator =
+    do { typedE1 <- typec e1
+       ; typedE2 <- typec e2
+       ; if getT typedE1 /= TBool || getT typedE2 /= TBool
+         then throwError $ OperandTypeError (getT typedE1) (getT typedE2)
+         else return $ operator TBool typedE1 typedE2
+       }
+
 -- Extract type of identifier from the environment starting from the inner most/top scope,
 -- stopping when you encounter one (this allows variable shadowing),
 -- returning Nothing if it's absent
@@ -260,24 +329,24 @@ typedSimple =
          , Var TFloat "y"])
    , [M.fromList [("x",TInt),("y",TFloat)]])
 
-typedProgram :: Prog
+typedProgram :: (Either SemanticError Prog, StaticEnv)
 typedProgram =
-    Prog [Define TInt "base" (Lit TInt (VInt 1))
+    (Right (Prog [Define TInt "base" (Lit TInt (VInt 1))
         , Func (Sig TInt [TInt]) TInt "factorial" [Param TInt "num"] 
             (Cond TInt (Equal TBool (Var TInt "num") (Var TInt "base"))
             (Var TInt "base")
             (Mult TInt (Var TInt "num") (Call TInt "factorial" [Minus TInt (Var TInt "num") (Lit TInt (VInt 1))])))
         , Define TFloat "aFloat" (Minus TFloat (Mult TInt (Add TInt (Neg TInt (Lit TInt (VInt 1))) (Lit TInt (VInt 0))) (Lit TInt (VInt 3))) (Mult TFloat (Mult TFloat (Lit TInt (VInt 4)) (Lit TFloat (VFloat 5.1))) (Lit TInt (VInt 6))))
         , Define TInt "result" (Lit TInt (VInt 10000000))
-        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])
-    ]
+        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])])
+    , [M.fromList [("base", TInt), ("factorial", (Sig TInt [TInt])), ("aFloat", TFloat), ("result", TInt)]])
 
-typedPlayground :: Prog
+typedPlayground :: (Either SemanticError Prog, StaticEnv)
 typedPlayground =
-    Prog [Define TInt "x" (Lit TInt (VInt 3))
+    (Right (Prog [Define TInt "x" (Lit TInt (VInt 3))
         , Func (Sig TInt [TInt]) TInt "identFunc" [Param TInt "num"] (Block TInt [Var TInt "x", Mult TInt (Add TInt (Lit TInt (VInt 1)) (Neg TInt (Var TInt "num"))) (Var TInt "num")])
         , Define TBools "conds" (Lit TBools (VBools [True,True,False,True]))
         , Loop TVoid (Lit TBool (VBool True)) (Cond TInt (Lit TBool (VBool True)) (Add TInt (Lit TInt (VInt 1)) (Mult TInt (Neg TInt (Cond TInt (Lit TBool (VBool True)) (Var TInt "x") (Var TInt "x"))) (Var TInt "x"))) (Lit TInt (VInt 3)))
         , Define TChars "greet" (Lit TChars (VChars "hello world"))
-        , Lit TVoid VNull
-    ]
+        , Lit TVoid VNull])
+    , [M.fromList [("x", TInt), ("identFunc", (Sig TInt [TInt])), ("conds", TBools), ("greet", TChars)]])

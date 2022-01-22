@@ -10,8 +10,8 @@ main =
     do { result <- parseFromFile prog "test/program.txt"
        ; case result of
              Left err  -> print err
-             Right ast -> do { print $ ast == program
-                             ; print $ typedSimple == typeCheckAST ast
+             Right ast -> do { print $ "Match AST: " ++ show (ast == program)
+                             ; print $ "Match Typed AST: " ++ show (typedProgram == typeCheckAST ast)
                              ; print $ typeCheckAST ast
                              }
        }
