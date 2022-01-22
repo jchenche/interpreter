@@ -144,7 +144,7 @@ typec (PT.Block es) =
        ; popScope
        ; if null typedEs
          then error "Illegal State: Block expressions must contain at least one expression!"
-       ; else return $ Block (getT $ last typedEs) typedEs
+         else return $ Block (getT $ last typedEs) typedEs
        }
 
 typec (PT.Cond e1 e2 e3) =
@@ -215,8 +215,8 @@ typecheckArith e1 e2 operator =
                               (TChars, TChars) -> TChars
                               _                -> TVoid
        ; if resultType == TVoid
-       ; then throwError $ OperandTypeError leftType rightType
-       ; else return $ operator resultType typedE1 typedE2
+         then throwError $ OperandTypeError leftType rightType
+         else return $ operator resultType typedE1 typedE2
        }
 
 typecheckComp :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
@@ -233,8 +233,8 @@ typecheckComp e1 e2 operator =
                               (TChars, TChars) -> TBool
                               _                -> TVoid
        ; if resultType /= TBool
-       ; then throwError $ OperandTypeError leftType rightType
-       ; else return $ operator TBool typedE1 typedE2
+         then throwError $ OperandTypeError leftType rightType
+         else return $ operator TBool typedE1 typedE2
        }
 
 typecheckLogic :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
