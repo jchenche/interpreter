@@ -14,6 +14,7 @@ data SemanticError = TypeMismatch Type Type
                    | FuncNotInScope Ident
                    | VarConflict Ident
                    | FuncConflict Ident
+                   | ParamConflict Ident
     deriving Eq
 
 instance Show SemanticError where
@@ -39,6 +40,9 @@ type TypeChecker = ExceptT SemanticError (State StaticEnv)
 --        ; return $ Prog [Lit TInt (VInt 3)]
 --        }
 
+typeCheckAST :: PT.Prog -> (Either SemanticError Prog, StaticEnv)
+typeCheckAST ast = runState (runExceptT (programTypeChecker ast)) []
+
 programTypeChecker :: PT.Prog -> TypeChecker Prog
 programTypeChecker (PT.Prog es) =
     do { pushScope
@@ -61,10 +65,26 @@ typec (PT.Define declaredType ident e) =
          else do { env <- get
                  ; case inTopScope ident env of
                        Just _  -> throwError $ VarConflict ident
-                       Nothing -> do { storeVariable ident declaredType env
+                       Nothing -> do { storeIdentifier ident declaredType env
                                      ; return $ Define declaredType ident typedE
                                      }
                  }
+       }
+
+typec (PT.Func returnType ident params e) =
+    do { env <- get
+       ; case inTopScope ident env of
+             Just _  -> throwError $ FuncConflict ident
+             Nothing -> do { storeIdentifier ident (makeFuncSig returnType params) env
+                           ; pushScope
+                           ; extendEnvWithParamTypes params
+                           ; typedE <- typec e
+                           ; if returnType /= getT typedE
+                             then throwError $ TypeMismatch returnType (getT typedE)
+                             else do { popScope
+                                     ; return $ Func (makeFuncSig returnType params) returnType ident params typedE
+                                     }
+                           }
        }
 
 typec (PT.Not e) =
@@ -77,7 +97,7 @@ typec (PT.Block es) =
        ; typedEs <- mapM (\e -> typec e) es
        ; popScope
        ; if null typedEs
-         then error "Illegal State: Block expressions must contain at least one expression"
+         then error "Illegal State: Block expressions must contain at least one expression!"
        ; else return $ Block (getT $ last typedEs) typedEs
        }
 
@@ -92,7 +112,7 @@ typec (PT.Lit e) =
         PT.VChars v      -> return $ Lit TChars (VChars v)
         PT.VBools v      -> return $ Lit TBools (VBools v)
         PT.VNull         -> return $ Lit TVoid VNull
-        PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking"
+        PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking!"
 
 typec _ = error "Illegal State: Shouldn't be here!"
 
@@ -108,14 +128,13 @@ inScope ident (scope:scopes) =
 
 -- Extract type of identifier from the top scope, return Nothing if it's absent
 inTopScope :: Ident -> StaticEnv -> Maybe Type
-inTopScope ident []        = Nothing
+inTopScope ident [] = error "Illegal State: Looking at an empty environment!"
 inTopScope ident (scope:_) = ident `M.lookup` scope
 
 -- Store identifier with a type in the environment
-storeVariable :: Ident -> Type -> StaticEnv -> TypeChecker ()
-storeVariable ident t (scope:scopes) = put (M.insert ident t scope:scopes)
-storeVariable _ _ [] = error "Illegal State: Storing variable to empty environment"
-
+storeIdentifier :: Ident -> Type -> StaticEnv -> TypeChecker ()
+storeIdentifier _ _ [] = error "Illegal State: Storing variable to empty environment!"
+storeIdentifier ident t (scope:scopes) = put ((M.insert ident t scope):scopes)
 
 -- Push a new scope to the top
 pushScope :: TypeChecker ()
@@ -131,6 +150,21 @@ popScope =
        ; case env of
              [] -> error "Illegal State: Popping a scope from an empty environment!"
              (_:scopes) -> put scopes
+       }
+
+-- Make a function signature from its return type and parameter types
+makeFuncSig :: Type -> [Param] -> Type
+makeFuncSig returnType params = Sig returnType $ map (\(Param t ident) -> t) params
+
+extendEnvWithParamTypes :: [Param] -> TypeChecker ()
+extendEnvWithParamTypes [] = return ()
+extendEnvWithParamTypes ((Param t ident):params) =
+    do { env <- get
+       ; case inTopScope ident env of
+             Just _  -> throwError $ ParamConflict ident
+             Nothing -> do { storeIdentifier ident t env
+                           ; extendEnvWithParamTypes params
+                           }
        }
 
 getT :: Expr -> Type
