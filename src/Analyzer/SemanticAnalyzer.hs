@@ -21,8 +21,8 @@ data SemanticError = TypeMismatch Type Type
     deriving Eq
 
 instance Show SemanticError where
-    show (TypeMismatch t1 t2) = show t1 ++ "doesn't match" ++ show t2
-    show _ = "[TODO] Error, refine later"
+    show (TypeMismatch t1 t2) = "Expecting type " ++ show t1 ++ " but got " ++ show t2
+    show _ = "[TODO] Error, refine later."
 
 type StaticEnv = [M.Map Ident Type]
 
@@ -150,6 +150,18 @@ typec (PT.Loop e body) =
          else do { typedBody <- typec body
                  ; return $ Loop TVoid typedE typedBody
                  }
+       }
+
+typec (PT.Assign ident e) =
+    do { env <- get
+       ; case inScope ident env of
+             Nothing        -> throwError $ VarNotInScope ident
+             Just (Sig _ _) -> throwError $ VarNotInScope ident -- Sig type implies a function
+             Just varType   -> do { typedE <- typec e
+                                  ; if varType /= getT typedE
+                                    then throwError $ TypeMismatch varType (getT typedE)
+                                    else return $ Assign varType ident typedE
+                                  }
        }
 
 typec _ = error "Illegal State: Shouldn't be here!"
