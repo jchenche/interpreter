@@ -54,25 +54,10 @@ programTypeChecker (PT.Prog es) =
        }
 
 typec :: PT.Expr -> TypeChecker Expr
-typec (PT.Var ident) =
-    do { env <- get
-       ; case inScope ident env of
-             Nothing        -> throwError $ VarNotInScope ident
-             Just (Sig _ _) -> throwError $ VarNotInScope ident -- Sig type implies a function
-             Just t         -> return $ Var t ident
-       }
 
-typec (PT.Define declaredType ident e) =
+typec (PT.Not e) =
     do { typedE <- typec e
-       ; if declaredType /= getT typedE
-         then throwError $ TypeMismatch declaredType (getT typedE)
-         else do { env <- get
-                 ; case inTopScope ident env of
-                       Just _  -> throwError $ VarConflict ident
-                       Nothing -> do { storeIdentInTopScope ident declaredType env
-                                     ; return $ Define declaredType ident typedE
-                                     }
-                 }
+       ; return $ Not (getT typedE) typedE
        }
 
 typec (PT.Func returnType ident params body) =
@@ -91,31 +76,17 @@ typec (PT.Func returnType ident params body) =
                            }
        }
 
-typec (PT.Call ident args) =
-    do { env <- get
-       ; case inScope ident env of
-             Just (Sig returnType paramTypes) -> do { typedArgs <- mapM (\arg -> typec arg) args
-                                                    ; let argTypes = map getT typedArgs
-                                                    ; let allTypesMatch = all (\(pt, at) -> pt == at) (zip paramTypes argTypes)
-                                                    ; if not (length paramTypes == length argTypes && allTypesMatch)
-                                                      then throwError $ SignatureMismatch ident
-                                                      else return $ Call returnType ident typedArgs
-                                                    }
-             _                                -> throwError $ FuncNotInScope ident
-       }
-
-typec (PT.Not e) =
+typec (PT.Define declaredType ident e) =
     do { typedE <- typec e
-       ; return $ Not (getT typedE) typedE
-       }
-
-typec (PT.Block es) = 
-    do { pushScope
-       ; typedEs <- mapM (\e -> typec e) es
-       ; popScope
-       ; if null typedEs
-         then error "Illegal State: Block expressions must contain at least one expression!"
-       ; else return $ Block (getT $ last typedEs) typedEs
+       ; if declaredType /= getT typedE
+         then throwError $ TypeMismatch declaredType (getT typedE)
+         else do { env <- get
+                 ; case inTopScope ident env of
+                       Just _  -> throwError $ VarConflict ident
+                       Nothing -> do { storeIdentInTopScope ident declaredType env
+                                     ; return $ Define declaredType ident typedE
+                                     }
+                 }
        }
 
 typec (PT.Lit e) =
@@ -130,6 +101,15 @@ typec (PT.Lit e) =
         PT.VBools v      -> return $ Lit TBools (VBools v)
         PT.VNull         -> return $ Lit TVoid VNull
         PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking!"
+
+typec (PT.Block es) = 
+    do { pushScope
+       ; typedEs <- mapM (\e -> typec e) es
+       ; popScope
+       ; if null typedEs
+         then error "Illegal State: Block expressions must contain at least one expression!"
+       ; else return $ Block (getT $ last typedEs) typedEs
+       }
 
 typec (PT.Cond e1 e2 e3) =
     do { typedE1 <- typec e1
@@ -152,6 +132,19 @@ typec (PT.Loop e body) =
                  }
        }
 
+typec (PT.Call ident args) =
+    do { env <- get
+       ; case inScope ident env of
+             Just (Sig returnType paramTypes) -> do { typedArgs <- mapM (\arg -> typec arg) args
+                                                    ; let argTypes = map getT typedArgs
+                                                    ; let allTypesMatch = all (\(pt, at) -> pt == at) (zip paramTypes argTypes)
+                                                    ; if not (length paramTypes == length argTypes && allTypesMatch)
+                                                      then throwError $ SignatureMismatch ident
+                                                      else return $ Call returnType ident typedArgs
+                                                    }
+             _                                -> throwError $ FuncNotInScope ident
+       }
+
 typec (PT.Assign ident e) =
     do { env <- get
        ; case inScope ident env of
@@ -162,6 +155,14 @@ typec (PT.Assign ident e) =
                                     then throwError $ TypeMismatch varType (getT typedE)
                                     else return $ Assign varType ident typedE
                                   }
+       }
+
+typec (PT.Var ident) =
+    do { env <- get
+       ; case inScope ident env of
+             Nothing        -> throwError $ VarNotInScope ident
+             Just (Sig _ _) -> throwError $ VarNotInScope ident -- Sig type implies a function
+             Just t         -> return $ Var t ident
        }
 
 typec _ = error "Illegal State: Shouldn't be here!"
