@@ -71,18 +71,18 @@ typec (PT.Define declaredType ident e) =
                  }
        }
 
-typec (PT.Func returnType ident params e) =
+typec (PT.Func returnType ident params body) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ FuncConflict ident
              Nothing -> do { storeIdentInTopScope ident (makeFuncSig returnType params) env
                            ; pushScope
                            ; extendEnvWithParamTypes params
-                           ; typedE <- typec e
-                           ; if returnType /= getT typedE
-                             then throwError $ TypeMismatch returnType (getT typedE)
+                           ; typedBody <- typec body
+                           ; if returnType /= getT typedBody
+                             then throwError $ TypeMismatch returnType (getT typedBody)
                              else do { popScope
-                                     ; return $ Func (makeFuncSig returnType params) returnType ident params typedE
+                                     ; return $ Func (makeFuncSig returnType params) returnType ident params typedBody
                                      }
                            }
        }
