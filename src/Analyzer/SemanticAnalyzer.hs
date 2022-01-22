@@ -11,6 +11,8 @@ import qualified Data.Map.Strict as M
 
 data SemanticError = TypeMismatch Type Type
                    | SignatureMismatch Ident
+                   | ExprIsNotBool Type
+                   | BranchTypeMismatch Type Type
                    | VarNotInScope Ident
                    | FuncNotInScope Ident
                    | VarConflict Ident
@@ -128,6 +130,18 @@ typec (PT.Lit e) =
         PT.VBools v      -> return $ Lit TBools (VBools v)
         PT.VNull         -> return $ Lit TVoid VNull
         PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking!"
+
+typec (PT.Cond e1 e2 e3) =
+    do { typedE1 <- typec e1
+       ; if getT typedE1 /= TBool
+         then throwError $ ExprIsNotBool (getT typedE1)
+         else do { typedE2 <- typec e2
+                 ; typedE3 <- typec e3
+                 ; if getT typedE2 /= getT typedE3
+                   then throwError $ BranchTypeMismatch (getT typedE2) (getT typedE3)
+                   else return $ Cond (getT typedE2) typedE1 typedE2 typedE3
+                 }
+       }
 
 typec _ = error "Illegal State: Shouldn't be here!"
 
