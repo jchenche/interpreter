@@ -10,6 +10,7 @@ import Control.Monad.Except
 import qualified Data.Map.Strict as M
 
 data SemanticError = TypeMismatch Type Type
+                   | SignatureMismatch Ident
                    | VarNotInScope Ident
                    | FuncNotInScope Ident
                    | VarConflict Ident
@@ -54,8 +55,9 @@ typec :: PT.Expr -> TypeChecker Expr
 typec (PT.Var ident) =
     do { env <- get
        ; case inScope ident env of
-             Nothing -> throwError $ VarNotInScope ident
-             Just t  -> return $ Var t ident
+             Nothing        -> throwError $ VarNotInScope ident
+             Just (Sig _ _) -> throwError $ VarNotInScope ident -- Sig type implies a function
+             Just t         -> return $ Var t ident
        }
 
 typec (PT.Define declaredType ident e) =
@@ -85,6 +87,19 @@ typec (PT.Func returnType ident params body) =
                                      ; return $ Func (makeFuncSig returnType params) returnType ident params typedBody
                                      }
                            }
+       }
+
+typec (PT.Call ident args) =
+    do { env <- get
+       ; case inScope ident env of
+             Just (Sig returnType paramTypes) -> do { typedArgs <- mapM (\arg -> typec arg) args
+                                                    ; let argTypes = map getT typedArgs
+                                                    ; let allTypesMatch = all (\(pt, at) -> pt == at) (zip paramTypes argTypes)
+                                                    ; if not (length paramTypes == length argTypes && allTypesMatch)
+                                                      then throwError $ SignatureMismatch ident
+                                                      else return $ Call returnType ident typedArgs
+                                                    }
+             _                                -> throwError $ FuncNotInScope ident
        }
 
 typec (PT.Not e) =
