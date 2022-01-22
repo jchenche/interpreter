@@ -10,9 +10,11 @@ import Control.Monad.Except
 import qualified Data.Map.Strict as M
 
 data SemanticError = TypeMismatch Type Type
-                   | SignatureMismatch Ident
-                   | ExprIsNotBool Type
+                   | OperandTypeError Type Type
                    | BranchTypeMismatch Type Type
+                   | SignatureMismatch Ident
+                   | ExprIsNotNum Type
+                   | ExprIsNotBool Type
                    | VarNotInScope Ident
                    | FuncNotInScope Ident
                    | VarConflict Ident
@@ -57,7 +59,17 @@ typec :: PT.Expr -> TypeChecker Expr
 
 typec (PT.Not e) =
     do { typedE <- typec e
-       ; return $ Not (getT typedE) typedE
+       ; if getT typedE /= TBool
+         then throwError $ ExprIsNotBool (getT typedE)
+         else return $ Not TBool typedE
+       }
+
+typec (PT.Neg e) =
+    do { typedE <- typec e
+       ; let operandType = getT typedE
+       ; if operandType /= TInt && operandType /= TFloat
+         then throwError $ ExprIsNotNum operandType
+         else return $ Neg operandType typedE
        }
 
 typec (PT.Func returnType ident params body) =
@@ -164,8 +176,6 @@ typec (PT.Var ident) =
              Just (Sig _ _) -> throwError $ VarNotInScope ident -- Sig type implies a function
              Just t         -> return $ Var t ident
        }
-
-typec _ = error "Illegal State: Shouldn't be here!"
 
 -- Extract type of identifier from the environment starting from the inner most/top scope,
 -- stopping when you encounter one (this allows variable shadowing),
