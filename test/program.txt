@@ -1,12 +1,13 @@
 int x = 1;
-// float y = 2.0;
-// !x;
-// y;
-int identFunc(int p1, int p2, float p3)
-{
-    p1;
-    x;
-};
+float y = 2.0;
+!x;
+y;
+// int identFunc(int p1, int p2, float p3)
+// {
+//     p1;
+//     x;
+// };
+
 // int base = 1;
 
 // int factorial(int num) if (num == base) base else num * factorial(num - 1);

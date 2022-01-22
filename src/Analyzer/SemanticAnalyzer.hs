@@ -65,7 +65,7 @@ typec (PT.Define declaredType ident e) =
          else do { env <- get
                  ; case inTopScope ident env of
                        Just _  -> throwError $ VarConflict ident
-                       Nothing -> do { storeIdentifier ident declaredType env
+                       Nothing -> do { storeIdentInTopScope ident declaredType env
                                      ; return $ Define declaredType ident typedE
                                      }
                  }
@@ -75,7 +75,7 @@ typec (PT.Func returnType ident params e) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ FuncConflict ident
-             Nothing -> do { storeIdentifier ident (makeFuncSig returnType params) env
+             Nothing -> do { storeIdentInTopScope ident (makeFuncSig returnType params) env
                            ; pushScope
                            ; extendEnvWithParamTypes params
                            ; typedE <- typec e
@@ -132,9 +132,9 @@ inTopScope ident [] = error "Illegal State: Looking at an empty environment!"
 inTopScope ident (scope:_) = ident `M.lookup` scope
 
 -- Store identifier with a type in the environment
-storeIdentifier :: Ident -> Type -> StaticEnv -> TypeChecker ()
-storeIdentifier _ _ [] = error "Illegal State: Storing variable to empty environment!"
-storeIdentifier ident t (scope:scopes) = put ((M.insert ident t scope):scopes)
+storeIdentInTopScope :: Ident -> Type -> StaticEnv -> TypeChecker ()
+storeIdentInTopScope _ _ [] = error "Illegal State: Storing variable to empty environment!"
+storeIdentInTopScope ident t (scope:scopes) = put ((M.insert ident t scope):scopes)
 
 -- Push a new scope to the top
 pushScope :: TypeChecker ()
@@ -154,7 +154,7 @@ popScope =
 
 -- Make a function signature from its return type and parameter types
 makeFuncSig :: Type -> [Param] -> Type
-makeFuncSig returnType params = Sig returnType $ map (\(Param t ident) -> t) params
+makeFuncSig returnType params = Sig returnType $ map (\(Param t _) -> t) params
 
 extendEnvWithParamTypes :: [Param] -> TypeChecker ()
 extendEnvWithParamTypes [] = return ()
@@ -162,7 +162,7 @@ extendEnvWithParamTypes ((Param t ident):params) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ ParamConflict ident
-             Nothing -> do { storeIdentifier ident t env
+             Nothing -> do { storeIdentInTopScope ident t env
                            ; extendEnvWithParamTypes params
                            }
        }
