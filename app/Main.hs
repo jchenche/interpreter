@@ -2,8 +2,8 @@ module Main where
 
 import Parser.Parser
 import Analyzer.SemanticAnalyzer
+import Interpreter.Interpreter
 
--- parseProg = parse expr "Parse Error" "1_helloWorld"
 main :: IO ()
 main =
     do { result <- parseSource "test/program.txt"
@@ -11,7 +11,13 @@ main =
              Left err  -> print err
              Right ast -> do { print $ "Match AST: " ++ show (ast == program)
                              ; print $ "Match Typed AST: " ++ show (typedProgram == typeCheckAST ast)
-                             ; print $ typeCheckAST ast
+                             ; case typeCheckAST ast of
+                                   (Left err, env) -> print err
+                                   (Right ast, _)  -> do { result <- interpretAST ast
+                                                         ; case result of
+                                                               (Left err, env) -> print err
+                                                               (Right _, _)    -> return ()
+                                                         }
                              }
        }
 
