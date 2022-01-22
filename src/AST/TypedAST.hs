@@ -10,7 +10,7 @@ data Prog = Prog [Expr]
 
 data Expr = Not Type Expr | Neg Type Expr
           | Mult Type Expr Expr | Div Type Expr Expr
-          | Add Type Expr Expr | Minus Type Expr Expr
+          | Plus Type Expr Expr | Minus Type Expr Expr
           | Lesser Type Expr Expr | LesserEq Type Expr Expr | Greater Type Expr Expr | GreaterEq Type Expr Expr
           | Equal Type Expr Expr | NotEqual Type Expr Expr
           | And Type Expr Expr

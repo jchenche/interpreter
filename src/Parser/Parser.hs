@@ -15,7 +15,7 @@ expr = buildExpressionParser opTable term <?> "expression"
 
 opTable = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
         , [binary "*" Mult AssocLeft, binary "/" Div AssocLeft]
-        , [binary "+" Add AssocLeft, binary "-" Minus AssocLeft]
+        , [binary "+" Plus AssocLeft, binary "-" Minus AssocLeft]
         , [binary "<" Lesser AssocLeft, binary "<=" LesserEq AssocLeft, binary ">" Greater AssocLeft, binary ">=" GreaterEq AssocLeft]
         , [binary "==" Equal AssocLeft, binary "!=" NotEqual AssocLeft]
         , [binary "&&" And AssocLeft]
@@ -116,7 +116,7 @@ program =
             (Cond (Equal (Var "num") (Var "base"))
             (Var "base")
             (Mult (Var "num") (Call "factorial" [Minus (Var "num") (Lit (VInt 1))])))
-        , Define TFloat "aFloat" (Minus (Mult (Add (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
+        , Define TFloat "aFloat" (Minus (Mult (Plus (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
         , Define TInt "result" (Lit (VInt 10000000))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
     ]
@@ -124,9 +124,9 @@ program =
 playground :: Prog
 playground =
     Prog [Define TInt "x" (Lit (VInt 3))
-        , Func TInt "identFunc" [Param TInt "num"] (Block [Var "x", Mult (Add (Lit (VInt 1)) (Neg (Var "num"))) (Var "num")])
+        , Func TInt "identFunc" [Param TInt "num"] (Block [Var "x", Mult (Plus (Lit (VInt 1)) (Neg (Var "num"))) (Var "num")])
         , Define TBools "conds" (Lit (VBools [True,True,False,True]))
-        , Loop (Lit (VBool True)) (Cond (Lit (VBool True)) (Add (Lit (VInt 1)) (Mult (Neg (Cond (Lit (VBool True)) (Var "x") (Var "x"))) (Var "x"))) (Lit (VInt 3)))
+        , Loop (Lit (VBool True)) (Cond (Lit (VBool True)) (Plus (Lit (VInt 1)) (Mult (Neg (Cond (Lit (VBool True)) (Var "x") (Var "x"))) (Var "x"))) (Lit (VInt 3)))
         , Define TChars "greet" (Lit (VChars "hello world"))
         , Lit VNull
     ]
