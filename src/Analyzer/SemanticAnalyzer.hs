@@ -157,6 +157,13 @@ typec (PT.Loop e body) =
                  }
        }
 
+typec (PT.Input t) = return $ Input t
+
+typec (PT.Print args) =
+    do { typedArgs <- mapM (\arg -> typec arg) args
+       ; return $ Print TVoid typedArgs
+       }
+
 typec (PT.Call ident args) =
     do { env <- get
        ; case inScope ident env of
@@ -308,6 +315,8 @@ getT (Block t _) = t
 getT (Func t _ _ _ _) = t
 getT (Cond t _ _ _) = t
 getT (Loop t _ _) = t
+getT (Input t) = t
+getT (Print t _) = t
 getT (Call t _ _) = t
 getT (Assign t _ _) = t
 getT (Var t _) = t
@@ -321,7 +330,10 @@ typedProgram =
             (Mult TInt (Var TInt "num") (Call TInt "factorial" [Minus TInt (Var TInt "num") (Lit TInt (VInt 1))])))
         , Define TFloat "aFloat" (Minus TFloat (Mult TInt (Plus TInt (Neg TInt (Lit TInt (VInt 1))) (Lit TInt (VInt 0))) (Lit TInt (VInt 3))) (Mult TFloat (Mult TFloat (Lit TInt (VInt 4)) (Lit TFloat (VFloat 5.1))) (Lit TInt (VInt 6))))
         , Define TInt "result" (Lit TInt (VInt 10000000))
-        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])]
+        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])
+        , Define TChars "name" (Input TChars)
+        , Print TVoid [Lit TChars (VChars "Hi, "), Var TChars "name"]
+        ]
 
 typedPlayground :: Prog
 typedPlayground =
@@ -330,4 +342,5 @@ typedPlayground =
         , Define TBools "conds" (Lit TBools (VBools [True,True,False,True]))
         , Loop TVoid (Lit TBool (VBool True)) (Cond TInt (Lit TBool (VBool True)) (Plus TInt (Lit TInt (VInt 1)) (Mult TInt (Neg TInt (Cond TInt (Lit TBool (VBool True)) (Var TInt "x") (Var TInt "x"))) (Var TInt "x"))) (Lit TInt (VInt 3)))
         , Define TChars "greet" (Lit TChars (VChars "hello world"))
-        , Lit TVoid VNull]
+        , Lit TVoid VNull
+        ]

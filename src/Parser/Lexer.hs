@@ -20,6 +20,8 @@ keywordFalse = "false"
 keywordNull = "null"
 keywordAssign = "="
 keywordArrow = "->"
+keywordInput = "input"
+keywordPrint = "print"
 
 customDef :: P.LanguageDef st
 customDef =  P.LanguageDef {
@@ -31,7 +33,7 @@ customDef =  P.LanguageDef {
     P.identLetter = alphaNum <|> char '_',
     P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
-    P.reservedNames = [keywordInt, keywordFloat, keywordChar, keywordBool, keywordInts, keywordFloats, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull, keywordAssign, keywordArrow],
+    P.reservedNames = [keywordInt, keywordFloat, keywordChar, keywordBool, keywordInts, keywordFloats, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull, keywordAssign, keywordArrow, keywordInput, keywordPrint],
     P.reservedOpNames = ["!" ,"*" ,"/" ,"+" ,"-" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!=", "&&", "||"],
     P.caseSensitive = True
 }

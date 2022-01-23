@@ -18,6 +18,8 @@ term ::= func
        | "(" expr ")"
        | cond
        | loop
+       | input
+       | print
        | call
        | assign
        | var
@@ -27,6 +29,8 @@ lit ::= integer | float | character | boolean | array | string | null
 block ::= "{" (expr ";")+ "}"
 cond ::= "if" "(" expr ")" expr "else" expr
 loop ::= "while" "(" expr ")" expr
+input ::= "input" type
+print ::= "print" "(" args ")"
 call ::= ident "(" args ")"
 assign ::= ident "=" expr
 var ::= ident

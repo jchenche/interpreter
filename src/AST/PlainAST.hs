@@ -18,6 +18,8 @@ data Expr = Not Expr | Neg Expr
           | Block [Expr]
           | Cond Expr Expr Expr
           | Loop Expr Expr
+          | Input Type
+          | Print [Expr]
           | Call Ident [Expr]
           | Assign Ident Expr
           | Var Ident

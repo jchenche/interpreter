@@ -21,6 +21,8 @@ data Expr = Not Type Expr | Neg Type Expr
           | Block Type [Expr]
           | Cond Type Expr Expr Expr
           | Loop Type Expr Expr
+          | Input Type
+          | Print Type [Expr]
           | Call Type Ident [Expr]
           | Assign Type Ident Expr
           | Var Type Ident

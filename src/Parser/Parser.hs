@@ -37,6 +37,8 @@ term = try func
    <|> parens expr
    <|> cond
    <|> loop
+   <|> parseInput
+   <|> parsePrint
    <|> try call
    <|> try assign
    <|> var
@@ -89,6 +91,10 @@ loop = do
     ; return $ Loop condition e
     }
 
+parseInput = Input <$> (reserved keywordInput *> parseType)
+
+parsePrint = Print <$> (reserved keywordPrint *> parens (commaSep expr))
+
 call = Call <$> identifier <*> parens (commaSep expr)
 
 assign = do
@@ -123,6 +129,8 @@ program =
         , Define TFloat "aFloat" (Minus (Mult (Plus (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
         , Define TInt "result" (Lit (VInt 10000000))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
+        , Define TChars "name" (Input TChars)
+        , Print [Lit (VChars "Hi, "), Var "name"]
     ]
 
 playground :: Prog

@@ -25,7 +25,7 @@ programEvaluator (Prog es) =
     do { env <- get
        ; put (M.empty:env)
        ; liftIO $ putStrLn "Put your name below..."
-       ; liftIO $ putStr "Name: " >> hFlush stdout 
+       ; liftIO $ putStr "Name: " >> hFlush stdout
        ; input <- liftIO getLine
        ; liftIO $ print ("Hello " ++ input) -- or lift . lift $ print "hi"
        ; throwError ArrayOutOfBound
@@ -73,6 +73,10 @@ eval (Block t es) = undefined
 eval (Cond t e1 e2 e3) = undefined
 
 eval (Loop t e body) = undefined
+
+eval (Input t) = undefined
+
+eval (Print t args) = undefined
 
 eval (Call t ident args) = undefined
 
