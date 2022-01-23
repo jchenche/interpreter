@@ -115,18 +115,17 @@ typec (PT.Define declaredType ident e) =
                  }
        }
 
-typec (PT.Lit e) =
-    case e of
-        PT.VInt v        -> return $ Lit TInt (VInt v)
-        PT.VFloat v      -> return $ Lit TFloat (VFloat v)
-        PT.VChar v       -> return $ Lit TChar (VChar v)
-        PT.VBool v       -> return $ Lit TBool (VBool v)
-        PT.VInts v       -> return $ Lit TInts (VInts v)
-        PT.VFloats v     -> return $ Lit TFloats (VFloats v)
-        PT.VChars v      -> return $ Lit TChars (VChars v)
-        PT.VBools v      -> return $ Lit TBools (VBools v)
-        PT.VNull         -> return $ Lit TVoid VNull
-        PT.Closure _ _ _ -> error "Illegal State: Closure doesn't exist during type-checking!"
+typec (PT.Lit v) =
+    case v of
+        PT.VInt x    -> return $ Lit TInt (VInt x)
+        PT.VFloat x  -> return $ Lit TFloat (VFloat x)
+        PT.VChar x   -> return $ Lit TChar (VChar x)
+        PT.VBool x   -> return $ Lit TBool (VBool x)
+        PT.VInts x   -> return $ Lit TInts (VInts x)
+        PT.VFloats x -> return $ Lit TFloats (VFloats x)
+        PT.VChars x  -> return $ Lit TChars (VChars x)
+        PT.VBools x  -> return $ Lit TBools (VBools x)
+        PT.VNull     -> return $ Lit TVoid VNull
 
 typec (PT.Block es) = 
     do { pushScope
@@ -312,31 +311,22 @@ getT (Call t _ _) = t
 getT (Assign t _ _) = t
 getT (Var t _) = t
 
-typedSimple =
-    (Right (Prog [Define TInt "x" (Lit TInt (VInt 1))
-         , Define TFloat "y" (Lit TFloat (VFloat 2.0))
-         , Not TInt (Var TInt "x")
-         , Var TFloat "y"])
-   , [M.fromList [("x",TInt),("y",TFloat)]])
-
-typedProgram :: (Either SemanticError Prog, StaticEnv)
+typedProgram :: Prog
 typedProgram =
-    (Right (Prog [Define TInt "base" (Lit TInt (VInt 1))
+    Prog [Define TInt "base" (Lit TInt (VInt 1))
         , Func (Sig TInt [TInt]) TInt "factorial" [Param TInt "num"] 
             (Cond TInt (Equal TBool (Var TInt "num") (Var TInt "base"))
             (Var TInt "base")
             (Mult TInt (Var TInt "num") (Call TInt "factorial" [Minus TInt (Var TInt "num") (Lit TInt (VInt 1))])))
         , Define TFloat "aFloat" (Minus TFloat (Mult TInt (Plus TInt (Neg TInt (Lit TInt (VInt 1))) (Lit TInt (VInt 0))) (Lit TInt (VInt 3))) (Mult TFloat (Mult TFloat (Lit TInt (VInt 4)) (Lit TFloat (VFloat 5.1))) (Lit TInt (VInt 6))))
         , Define TInt "result" (Lit TInt (VInt 10000000))
-        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])])
-    , [M.fromList [("base", TInt), ("factorial", (Sig TInt [TInt])), ("aFloat", TFloat), ("result", TInt)]])
+        , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])]
 
-typedPlayground :: (Either SemanticError Prog, StaticEnv)
+typedPlayground :: Prog
 typedPlayground =
-    (Right (Prog [Define TInt "x" (Lit TInt (VInt 3))
+    Prog [Define TInt "x" (Lit TInt (VInt 3))
         , Func (Sig TInt [TInt]) TInt "identFunc" [Param TInt "num"] (Block TInt [Var TInt "x", Mult TInt (Plus TInt (Lit TInt (VInt 1)) (Neg TInt (Var TInt "num"))) (Var TInt "num")])
         , Define TBools "conds" (Lit TBools (VBools [True,True,False,True]))
         , Loop TVoid (Lit TBool (VBool True)) (Cond TInt (Lit TBool (VBool True)) (Plus TInt (Lit TInt (VInt 1)) (Mult TInt (Neg TInt (Cond TInt (Lit TBool (VBool True)) (Var TInt "x") (Var TInt "x"))) (Var TInt "x"))) (Lit TInt (VInt 3)))
         , Define TChars "greet" (Lit TChars (VChars "hello world"))
-        , Lit TVoid VNull])
-    , [M.fromList [("x", TInt), ("identFunc", (Sig TInt [TInt])), ("conds", TBools), ("greet", TChars)]])
+        , Lit TVoid VNull]

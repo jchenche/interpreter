@@ -10,10 +10,10 @@ main =
        ; case result of
              Left err  -> print err
              Right ast -> do { print $ "Match AST: " ++ show (ast == program)
-                             ; print $ "Match Typed AST: " ++ show (typedProgram == typeCheckAST ast)
                              ; case typeCheckAST ast of
                                    (Left err, env) -> print err
-                                   (Right ast, _)  -> do { result <- interpretAST ast
+                                   (Right ast, _)  -> do { print $ "Match Typed AST: " ++ show (ast == typedProgram)
+                                                         ; result <- interpretAST ast
                                                          ; case result of
                                                                (Left err, env) -> print err
                                                                (Right _, _)    -> return ()
