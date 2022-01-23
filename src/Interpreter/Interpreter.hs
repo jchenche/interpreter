@@ -2,7 +2,7 @@ module Interpreter.Interpreter where
 
 import AST.CommonAST
 import AST.TypedAST
-import Control.Monad.State (StateT, runStateT, put, get) -- From the mtl library
+import Control.Monad.State (StateT, runStateT, put, get, liftIO) -- From the mtl library
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import qualified Data.Map.Strict as M
 
@@ -16,15 +16,14 @@ instance Show RuntimeError where
 
 type Interpreter = ExceptT RuntimeError (StateT DynamicEnv IO)
 
--- temp :: PT.Prog -> TypeChecker Prog
--- temp (PT.Prog es) =
---     do {
---          env <- get
---     --    ; lift $ lift $ print "hi"
---        ; put (M.empty:env)
---        ; throwError (FuncNotInScope "hello")
---        ; return $ Prog [Lit TInt (VInt 3)]
---        }
-
 interpretAST :: Prog -> IO (Either RuntimeError Prog, DynamicEnv)
-interpretAST ast = return (Left DivByZero, [])
+interpretAST ast = runStateT (runExceptT (programEvaluator ast)) []
+
+programEvaluator :: Prog -> Interpreter Prog
+programEvaluator (Prog es) =
+    do { env <- get
+       ; liftIO $ print "hello world!" -- or lift . lift $ print "hi"
+       ; put (M.empty:env)
+       ; throwError ArrayOutOfBound
+       ; return $ Prog [Lit TInt (VInt 3)]
+       }
