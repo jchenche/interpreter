@@ -92,15 +92,15 @@ typec (PT.Func returnType ident params body) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ FuncConflict ident
-             Nothing -> do { storeIdentInTopScope ident (makeFuncSig returnType params) env
+             Nothing -> do { let funcSig = makeFuncSig returnType params
+                           ; storeIdentInTopScope ident funcSig env
                            ; pushScope
-                           ; extendEnvWithParam params
+                           ; extendEnvWithParams params
                            ; typedBody <- typec body
+                           ; popScope
                            ; if returnType /= getT typedBody
                              then throwError $ TypeMismatch returnType (getT typedBody)
-                             else do { popScope
-                                     ; return $ Func (makeFuncSig returnType params) returnType ident params typedBody
-                                     }
+                             else return $ Func funcSig returnType ident params typedBody
                            }
        }
 
@@ -290,14 +290,14 @@ makeFuncSig :: Type -> [Param] -> Type
 makeFuncSig returnType params = Sig returnType $ map (\(Param t _) -> t) params
 
 -- Store parameter identifiers with their types in the top scope of environment
-extendEnvWithParam :: [Param] -> TypeChecker ()
-extendEnvWithParam [] = return ()
-extendEnvWithParam ((Param t ident):params) =
+extendEnvWithParams :: [Param] -> TypeChecker ()
+extendEnvWithParams [] = return ()
+extendEnvWithParams ((Param t ident):params) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ ParamConflict ident
              Nothing -> do { storeIdentInTopScope ident t env
-                           ; extendEnvWithParam params
+                           ; extendEnvWithParams params
                            }
        }
 

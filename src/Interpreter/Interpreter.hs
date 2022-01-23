@@ -117,7 +117,7 @@ eval (Call _ ident args) =
                  do { vs <- mapM (\arg -> eval arg) args
                     ; put closureEnv
                     ; pushScope
-                    ; extendEnvWithParam (zip params vs)
+                    ; extendEnvWithParams (zip params vs)
                     ; extendedClosureEnv <- get
                     ; storeIdentInTopScope ident closure extendedClosureEnv
                     ; returnValue <- eval body
@@ -231,10 +231,10 @@ popScope =
        }
 
 -- Store parameter identifiers with their values in the top scope of environment
-extendEnvWithParam :: [(Param, Val)] -> Interpreter ()
-extendEnvWithParam [] = return ()
-extendEnvWithParam (((Param _ ident), v):paramArgPairs) =
+extendEnvWithParams :: [(Param, Val)] -> Interpreter ()
+extendEnvWithParams [] = return ()
+extendEnvWithParams (((Param _ ident), v):paramArgPairs) =
     do { env <- get
        ; storeIdentInTopScope ident v env
-       ; extendEnvWithParam paramArgPairs
+       ; extendEnvWithParams paramArgPairs
        }
