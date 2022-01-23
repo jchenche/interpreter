@@ -1,8 +1,12 @@
 float aFloat = 1.2;
+int num = 300;
+int factorial(int x) num;
 {
     int x = 1;
     aFloat = 12345.6;
+    print(factorial(3), "\n");
 };
+
 print("Input is: ", input float, "\n");
 print("Variable is: ", aFloat, "\n");
 aFloat = 0.0;

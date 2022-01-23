@@ -73,7 +73,12 @@ eval (And t e1 e2) = undefined
 
 eval (Or t e1 e2) = undefined
 
-eval (Func t returnType ident params body) = undefined
+eval f@(Func _ _ ident _ _) =
+    do { env <- get
+       ; let v = Closure f env -- This enables lexical scoping of functions
+       ; storeIdentInTopScope ident v env
+       ; return v
+       }
 
 eval (Define _ ident e) =
     do { v <- eval e
@@ -105,7 +110,23 @@ eval (Print _ args) =
        ; return VNull
        }
 
-eval (Call t ident args) = undefined
+eval (Call _ ident args) =
+    do { env <- get
+       ; case inScope ident env of
+             Just closure@(Closure (Func _ _ _ params body) closureEnv) ->
+                 do { vs <- mapM (\arg -> eval arg) args
+                    ; put closureEnv
+                    ; pushScope
+                    ; extendEnvWithParam (zip params vs)
+                    ; extendedClosureEnv <- get
+                    ; storeIdentInTopScope ident closure extendedClosureEnv
+                    ; returnValue <- eval body
+                    ; popScope
+                    ; put env
+                    ; return returnValue
+                    }
+             _                                                          -> error "Illegal State: Function not in scope!"
+       }
 
 eval (Assign _ ident e) =
     do { v <- eval e
@@ -209,14 +230,11 @@ popScope =
              (_:scopes) -> put scopes
        }
 
--- -- Store parameter identifiers with their values in the top scope of environment
--- extendEnvWithParam :: [Param] -> Interpreter ()
--- extendEnvWithParam [] = return ()
--- extendEnvWithParam ((Param t ident):params) =
---     do { env <- get
---        ; case inTopScope ident env of
---              Just _  -> throwError $ ParamConflict ident
---              Nothing -> do { storeIdentInTopScope ident t env
---                            ; extendEnvWithParam params
---                            }
---        }
+-- Store parameter identifiers with their values in the top scope of environment
+extendEnvWithParam :: [(Param, Val)] -> Interpreter ()
+extendEnvWithParam [] = return ()
+extendEnvWithParam (((Param _ ident), v):paramArgPairs) =
+    do { env <- get
+       ; storeIdentInTopScope ident v env
+       ; extendEnvWithParam paramArgPairs
+       }
