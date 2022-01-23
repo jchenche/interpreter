@@ -77,7 +77,7 @@ eval (Func t returnType ident params body) = undefined
 
 eval (Define declaredType ident e) = undefined
 
-eval (Lit t v) = return v
+eval (Lit _ v) = return v
 
 eval (Block t es) = undefined
 
@@ -114,14 +114,14 @@ evalInput input TFloat =
     case (readMaybe input :: Maybe Double) of
         Nothing  -> throwError $ InputError "Input is not a float"
         Just v   -> return $ VFloat v
-evalInput input TChar = error "Illegal State: cannot read a character!"
-evalInput input TBool = error "Illegal State: cannot read a boolean!"
-evalInput input TInts = error "Illegal State: cannot read a list of integers!"
-evalInput input TFloats = error "Illegal State: cannot read a list of floats!"
+evalInput input TChar = error "Illegal State: Cannot read a character!"
+evalInput input TBool = error "Illegal State: Cannot read a boolean!"
+evalInput input TInts = error "Illegal State: Cannot read a list of integers!"
+evalInput input TFloats = error "Illegal State: Cannot read a list of floats!"
 evalInput input TChars = return $ VChars input
-evalInput input TBools = error "Illegal State: cannot read a list of booleans!"
-evalInput input TVoid = error "Illegal State: cannot read a null!"
-evalInput input (Sig _ _) = error "Illegal State: cannot read a function!"
+evalInput input TBools = error "Illegal State: Cannot read a list of booleans!"
+evalInput input TVoid = error "Illegal State: Cannot read a null!"
+evalInput input (Sig _ _) = error "Illegal State: Cannot read a function!"
 
 printValue :: Val -> Interpreter ()
 printValue v =

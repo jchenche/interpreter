@@ -25,7 +25,7 @@ data SemanticError = TypeMismatch Type Type
 
 instance Show SemanticError where
     show (TypeMismatch t1 t2) = "Expecting type " ++ show t1 ++ " but got " ++ show t2
-    show InputTypeError = "Can only read integer, float, or string"
+    show InputTypeError = "Can only read integer, float, or string as input"
     show _ = "[TODO] Semantic error, refine later"
 
 type StaticEnv = [M.Map Ident Type]
