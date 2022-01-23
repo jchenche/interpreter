@@ -2,8 +2,8 @@ module Interpreter.Interpreter where
 
 import AST.CommonAST
 import AST.TypedAST
-import Control.Monad.State (StateT, runStateT, put, get, liftIO) -- From the mtl library
-import Control.Monad.Except (ExceptT, runExceptT, throwError)
+import Control.Monad.State (StateT, runStateT, put, get)
+import Control.Monad.Except (ExceptT, runExceptT, throwError, liftIO)
 import qualified Data.Map.Strict as M
 
 data RuntimeError = DivByZero
