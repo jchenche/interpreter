@@ -127,7 +127,7 @@ typec (PT.Lit v) =
         PT.VBools x  -> return $ Lit TBools (VBools x)
         PT.VNull     -> return $ Lit TVoid VNull
 
-typec (PT.Block es) = 
+typec (PT.Block es) =
     do { pushScope
        ; typedEs <- mapM (\e -> typec e) es
        ; popScope
@@ -186,7 +186,7 @@ typec (PT.Var ident) =
     do { env <- get
        ; case inScope ident env of
              Nothing        -> throwError $ VarNotInScope ident
-             Just (Sig _ _) -> throwError $ VarNotInScope ident -- Sig type implies a function
+             Just (Sig _ _) -> throwError $ VarNotInScope ident
              Just t         -> return $ Var t ident
        }
 
@@ -250,7 +250,7 @@ inTopScope :: Ident -> StaticEnv -> Maybe Type
 inTopScope ident [] = error "Illegal State: Looking at an empty environment!"
 inTopScope ident (scope:_) = ident `M.lookup` scope
 
--- Store identifier with a type in the environment
+-- Store identifier with a type in the top scope of environment
 storeIdentInTopScope :: Ident -> Type -> StaticEnv -> TypeChecker ()
 storeIdentInTopScope _ _ [] = error "Illegal State: Storing variable to empty environment!"
 storeIdentInTopScope ident t (scope:scopes) = put ((M.insert ident t scope):scopes)
@@ -275,6 +275,7 @@ popScope =
 makeFuncSig :: Type -> [Param] -> Type
 makeFuncSig returnType params = Sig returnType $ map (\(Param t _) -> t) params
 
+-- Store parameter identifiers with their types in the top scope of environment
 extendEnvWithParamTypes :: [Param] -> TypeChecker ()
 extendEnvWithParamTypes [] = return ()
 extendEnvWithParamTypes ((Param t ident):params) =
