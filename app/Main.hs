@@ -17,7 +17,7 @@ main =
                                                          ; result <- interpretAST ast
                                                          ; case result of
                                                                (Left err, env) -> print err
-                                                               (Right _, _)    -> putStrLn "=== SUCCESSFUL EXECUTION ==="
+                                                               (Right _, env)    -> putStrLn "=== SUCCESSFUL EXECUTION ===" >> print env
                                                          }
                              }
        }

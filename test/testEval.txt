@@ -1,2 +1,8 @@
-
-print("Hi, ", input float, null, "\n");
+float aFloat = 1.2;
+{
+    int x = 1;
+    aFloat = 12345.6;
+};
+print("Input is: ", input float, "\n");
+print("Variable is: ", aFloat, "\n");
+aFloat = 0.0;

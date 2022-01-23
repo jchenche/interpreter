@@ -21,7 +21,7 @@ instance Show RuntimeError where
 
 type Interpreter = ExceptT RuntimeError (StateT DynamicEnv IO)
 
-interpretAST :: Prog -> IO (Either RuntimeError Val, DynamicEnv)
+interpretAST :: Prog -> IO (Either RuntimeError (), DynamicEnv)
 interpretAST ast = runStateT (runExceptT (programEvaluator ast)) []
 
 -- programEvaluator :: Prog -> Interpreter Val
@@ -36,11 +36,11 @@ interpretAST ast = runStateT (runExceptT (programEvaluator ast)) []
 --        ; return $ VInt 3
 --        }
 
-programEvaluator :: Prog -> Interpreter Val
+programEvaluator :: Prog -> Interpreter ()
 programEvaluator (Prog es) =
     do { pushScope
        ; vs <- mapM (\e -> eval e) es
-       ; return $ VInt 3
+       ; return ()
        }
 
 eval :: Expr -> Interpreter Val
@@ -75,11 +75,23 @@ eval (Or t e1 e2) = undefined
 
 eval (Func t returnType ident params body) = undefined
 
-eval (Define declaredType ident e) = undefined
+eval (Define _ ident e) =
+    do { v <- eval e
+       ; env <- get
+       ; storeIdentInTopScope ident v env
+       ; return v
+       }
 
 eval (Lit _ v) = return v
 
-eval (Block t es) = undefined
+eval (Block _ es) =
+    do { pushScope
+       ; vs <- mapM (\e -> eval e) es
+       ; popScope
+       ; if null vs
+         then error "Illegal State: Block expressions must contain at least one expression!"
+         else return $ last vs
+       }
 
 eval (Cond t e1 e2 e3) = undefined
 
@@ -87,7 +99,7 @@ eval (Loop t e body) = undefined
 
 eval (Input t) = liftIO getLine >>= (\input -> evalInput input t)
 
-eval (Print t args) =
+eval (Print _ args) =
     do { vs <- mapM (\arg -> eval arg) args
        ; mapM (\v -> printValue v) vs
        ; return VNull
@@ -95,9 +107,20 @@ eval (Print t args) =
 
 eval (Call t ident args) = undefined
 
-eval (Assign t ident e) = undefined
+eval (Assign _ ident e) =
+    do { v <- eval e
+       ; env <- get
+       ; updateVariable ident v env
+       ; return v
+       }
 
-eval (Var t ident) = undefined
+eval (Var _ ident) =
+    do { env <- get
+       ; case inScope ident env of
+             Nothing            -> error "Illegal State: Variable not in scope!"
+             Just (Closure _ _) -> error "Illegal State: Variable not in scope!"
+             Just v             -> return v
+       }
 
 {-
     do {
@@ -156,6 +179,19 @@ inTopScope ident (scope:_) = ident `M.lookup` scope
 storeIdentInTopScope :: Ident -> Val -> DynamicEnv -> Interpreter ()
 storeIdentInTopScope _ _ [] = error "Illegal State: Storing variable to empty environment!"
 storeIdentInTopScope ident v (scope:scopes) = put ((M.insert ident v scope):scopes)
+
+-- Update value of identifier in the environment starting from the inner most/top scope,
+-- stopping when you encounter one (this allows variable shadowing)
+updateVariable :: Ident -> Val -> DynamicEnv -> Interpreter ()
+updateVariable _ _ [] = error "Illegal State: Updating variable to empty environment!"
+updateVariable ident v (scope:scopes) =
+    if updatedScope == scope -- Means it hasn't found the variable in that scope
+    then do { updateVariable ident v scopes
+            ; updatedScopes <- get
+            ; put (scope:updatedScopes)
+            }
+    else put (updatedScope:scopes)
+    where updatedScope = M.adjust (\_ -> v) ident scope
 
 -- Push a new scope to the top
 pushScope :: Interpreter ()
