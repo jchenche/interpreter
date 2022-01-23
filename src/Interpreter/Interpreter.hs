@@ -4,6 +4,7 @@ import AST.CommonAST
 import AST.TypedAST
 import Control.Monad.State (StateT, runStateT, put, get)
 import Control.Monad.Except (ExceptT, runExceptT, throwError, liftIO)
+import System.IO (hFlush, stdout)
 import qualified Data.Map.Strict as M
 
 data RuntimeError = DivByZero
@@ -22,8 +23,11 @@ interpretAST ast = runStateT (runExceptT (programEvaluator ast)) []
 programEvaluator :: Prog -> Interpreter Prog
 programEvaluator (Prog es) =
     do { env <- get
-       ; liftIO $ print "hello world!" -- or lift . lift $ print "hi"
        ; put (M.empty:env)
+       ; liftIO $ putStrLn "Put your name below..."
+       ; liftIO $ putStr "Name: " >> hFlush stdout 
+       ; input <- liftIO getLine
+       ; liftIO $ print ("Hello " ++ input) -- or lift . lift $ print "hi"
        ; throwError ArrayOutOfBound
        ; return $ Prog [Lit TInt (VInt 3)]
        }

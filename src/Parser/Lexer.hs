@@ -31,7 +31,7 @@ customDef =  P.LanguageDef {
     P.identLetter = alphaNum <|> char '_',
     P.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
     P.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
-    P.reservedNames = [keywordInt, keywordChar, keywordBool, keywordInts, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull, keywordAssign, keywordArrow],
+    P.reservedNames = [keywordInt, keywordFloat, keywordChar, keywordBool, keywordInts, keywordFloats, keywordChars, keywordBools, keywordVoid, keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull, keywordAssign, keywordArrow],
     P.reservedOpNames = ["!" ,"*" ,"/" ,"+" ,"-" ,"<" ,"<=" ,">" ,">=" ,"==" ,"!=", "&&", "||"],
     P.caseSensitive = True
 }
