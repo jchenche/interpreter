@@ -143,12 +143,6 @@ eval (Var _ ident) =
              Just v             -> return v
        }
 
-{-
-    do {
-       ;
-       }
--}
-
 evalInput :: String -> Type -> Interpreter Val
 evalInput input TInt =
     case (readMaybe input :: Maybe Integer) of

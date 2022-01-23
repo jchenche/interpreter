@@ -92,7 +92,7 @@ typec (PT.Func returnType ident params body) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ FuncConflict ident
-             Nothing -> do { let funcSig = makeFuncSig returnType params
+             Nothing -> do { let funcSig = Sig returnType $ map (\(Param t _) -> t) params
                            ; storeIdentInTopScope ident funcSig env
                            ; pushScope
                            ; extendEnvWithParams params
@@ -284,10 +284,6 @@ popScope =
              [] -> error "Illegal State: Popping a scope from an empty environment!"
              (_:scopes) -> put scopes
        }
-
--- Make a function signature from its return type and parameter types
-makeFuncSig :: Type -> [Param] -> Type
-makeFuncSig returnType params = Sig returnType $ map (\(Param t _) -> t) params
 
 -- Store parameter identifiers with their types in the top scope of environment
 extendEnvWithParams :: [Param] -> TypeChecker ()
