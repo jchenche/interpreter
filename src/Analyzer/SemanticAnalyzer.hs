@@ -20,10 +20,12 @@ data SemanticError = TypeMismatch Type Type
                    | VarConflict Ident
                    | FuncConflict Ident
                    | ParamConflict Ident
+                   | InputTypeError
     deriving Eq
 
 instance Show SemanticError where
     show (TypeMismatch t1 t2) = "Expecting type " ++ show t1 ++ " but got " ++ show t2
+    show InputTypeError = "Can only read integer, float, or string"
     show _ = "[TODO] Semantic error, refine later"
 
 type StaticEnv = [M.Map Ident Type]
@@ -92,7 +94,7 @@ typec (PT.Func returnType ident params body) =
              Just _  -> throwError $ FuncConflict ident
              Nothing -> do { storeIdentInTopScope ident (makeFuncSig returnType params) env
                            ; pushScope
-                           ; extendEnvWithParamTypes params
+                           ; extendEnvWithParam params
                            ; typedBody <- typec body
                            ; if returnType /= getT typedBody
                              then throwError $ TypeMismatch returnType (getT typedBody)
@@ -157,7 +159,12 @@ typec (PT.Loop e body) =
                  }
        }
 
-typec (PT.Input t) = return $ Input t
+typec (PT.Input t) =
+    case t of
+        TInt   -> return $ Input t
+        TFloat -> return $ Input t
+        TChars -> return $ Input t
+        _      -> throwError InputTypeError
 
 typec (PT.Print args) =
     do { typedArgs <- mapM (\arg -> typec arg) args
@@ -198,7 +205,7 @@ typec (PT.Var ident) =
        }
 
 arithTypeChecker :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
-arithTypeChecker e1 e2 operator =
+arithTypeChecker e1 e2 opConstructor =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; let leftType = getT typedE1
@@ -212,11 +219,11 @@ arithTypeChecker e1 e2 operator =
                               _                -> TVoid
        ; if resultType == TVoid
          then throwError $ OperandTypeError leftType rightType
-         else return $ operator resultType typedE1 typedE2
+         else return $ opConstructor resultType typedE1 typedE2
        }
 
 compTypeChecker :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
-compTypeChecker e1 e2 operator =
+compTypeChecker e1 e2 opConstructor =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; let leftType = getT typedE1
@@ -230,16 +237,16 @@ compTypeChecker e1 e2 operator =
                               _                -> TVoid
        ; if resultType /= TBool
          then throwError $ OperandTypeError leftType rightType
-         else return $ operator TBool typedE1 typedE2
+         else return $ opConstructor TBool typedE1 typedE2
        }
 
 logicTypeChecker :: PT.Expr -> PT.Expr -> (Type -> Expr -> Expr -> Expr) -> TypeChecker Expr
-logicTypeChecker e1 e2 operator =
+logicTypeChecker e1 e2 opConstructor =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; if getT typedE1 /= TBool || getT typedE2 /= TBool
          then throwError $ OperandTypeError (getT typedE1) (getT typedE2)
-         else return $ operator TBool typedE1 typedE2
+         else return $ opConstructor TBool typedE1 typedE2
        }
 
 -- Extract type of identifier from the environment starting from the inner most/top scope,
@@ -283,14 +290,14 @@ makeFuncSig :: Type -> [Param] -> Type
 makeFuncSig returnType params = Sig returnType $ map (\(Param t _) -> t) params
 
 -- Store parameter identifiers with their types in the top scope of environment
-extendEnvWithParamTypes :: [Param] -> TypeChecker ()
-extendEnvWithParamTypes [] = return ()
-extendEnvWithParamTypes ((Param t ident):params) =
+extendEnvWithParam :: [Param] -> TypeChecker ()
+extendEnvWithParam [] = return ()
+extendEnvWithParam ((Param t ident):params) =
     do { env <- get
        ; case inTopScope ident env of
              Just _  -> throwError $ ParamConflict ident
              Nothing -> do { storeIdentInTopScope ident t env
-                           ; extendEnvWithParamTypes params
+                           ; extendEnvWithParam params
                            }
        }
 

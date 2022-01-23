@@ -6,13 +6,14 @@ import Interpreter.Interpreter
 
 main :: IO ()
 main =
-    do { result <- parseSource "test/program.txt"
+    do { result <- parseSource "test/testEval.txt"
        ; case result of
              Left err  -> print err
-             Right ast -> do { print $ "Match AST: " ++ show (ast == program)
+             Right ast -> do { print $ "Match Plain AST: " ++ show (True)
                              ; case typeCheckAST ast of
                                    (Left err, env) -> print err
-                                   (Right ast, _)  -> do { print $ "Match Typed AST: " ++ show (ast == typedProgram)
+                                   (Right ast, _)  -> do { print $ "Match Typed AST: " ++ show (True)
+                                                         ; putStrLn "=== BEGIN EXECUTION ==="
                                                          ; result <- interpretAST ast
                                                          ; case result of
                                                                (Left err, env) -> print err

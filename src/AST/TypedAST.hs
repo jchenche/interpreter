@@ -28,5 +28,6 @@ data Expr = Not Type Expr | Neg Type Expr
           | Var Type Ident
     deriving (Show, Eq)
 
-data Val = VInt Integer | VFloat Double | VChar Char | VBool Bool | VInts [Integer] | VFloats [Double] | VChars [Char] | VBools [Bool] | VNull | Closure [Param] Expr DynamicEnv
+-- Expr of Closure is always a Func
+data Val = VInt Integer | VFloat Double | VChar Char | VBool Bool | VInts [Integer] | VFloats [Double] | VChars [Char] | VBools [Bool] | VNull | Closure Expr DynamicEnv
     deriving (Show, Eq)
