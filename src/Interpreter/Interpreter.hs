@@ -95,17 +95,83 @@ eval (Minus _ e1 e2) =
              _                      -> error "Illegal State: Arithmetic performed on non-numbers!"
        }
 
-eval (Lesser t e1 e2) = undefined
+eval (Lesser _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> evalEquality x1 x2
+             (VFloat x1, VFloat x2) -> evalEquality x1 x2
+             (VChar x1, VChar x2)   -> evalEquality x1 x2
+             (VBool x1, VBool x2)   -> evalEquality x1 x2
+             (VChars x1, VChars x2) -> evalEquality x1 x2
+             _                      -> error "Illegal State: Comparison performed on wrong values!"
+       }
+    where evalEquality x1 x2 = return $ if x1 < x2 then (VBool True) else (VBool False)
 
-eval (LesserEq t e1 e2) = undefined
+eval (LesserEq _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> evalEquality x1 x2
+             (VFloat x1, VFloat x2) -> evalEquality x1 x2
+             (VChar x1, VChar x2)   -> evalEquality x1 x2
+             (VBool x1, VBool x2)   -> evalEquality x1 x2
+             (VChars x1, VChars x2) -> evalEquality x1 x2
+             _                      -> error "Illegal State: Comparison performed on wrong values!"
+       }
+    where evalEquality x1 x2 = return $ if x1 <= x2 then (VBool True) else (VBool False)
 
-eval (Greater t e1 e2) = undefined
+eval (Greater _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> evalEquality x1 x2
+             (VFloat x1, VFloat x2) -> evalEquality x1 x2
+             (VChar x1, VChar x2)   -> evalEquality x1 x2
+             (VBool x1, VBool x2)   -> evalEquality x1 x2
+             (VChars x1, VChars x2) -> evalEquality x1 x2
+             _                      -> error "Illegal State: Comparison performed on wrong values!"
+       }
+    where evalEquality x1 x2 = return $ if x1 > x2 then (VBool True) else (VBool False)
 
-eval (GreaterEq t e1 e2) = undefined
+eval (GreaterEq _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> evalEquality x1 x2
+             (VFloat x1, VFloat x2) -> evalEquality x1 x2
+             (VChar x1, VChar x2)   -> evalEquality x1 x2
+             (VBool x1, VBool x2)   -> evalEquality x1 x2
+             (VChars x1, VChars x2) -> evalEquality x1 x2
+             _                      -> error "Illegal State: Comparison performed on wrong values!"
+       }
+    where evalEquality x1 x2 = return $ if x1 >= x2 then (VBool True) else (VBool False)
 
-eval (Equal t e1 e2) = undefined
+eval (Equal _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> evalEquality x1 x2
+             (VFloat x1, VFloat x2) -> evalEquality x1 x2
+             (VChar x1, VChar x2)   -> evalEquality x1 x2
+             (VBool x1, VBool x2)   -> evalEquality x1 x2
+             (VChars x1, VChars x2) -> evalEquality x1 x2
+             _                      -> error "Illegal State: Comparison performed on wrong values!"
+       }
+    where evalEquality x1 x2 = return $ if x1 == x2 then (VBool True) else (VBool False)
 
-eval (NotEqual t e1 e2) = undefined
+eval (NotEqual _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> evalInequality x1 x2
+             (VFloat x1, VFloat x2) -> evalInequality x1 x2
+             (VChar x1, VChar x2)   -> evalInequality x1 x2
+             (VBool x1, VBool x2)   -> evalInequality x1 x2
+             (VChars x1, VChars x2) -> evalInequality x1 x2
+             _                      -> error "Illegal State: Comparison performed on wrong values!"
+       }
+    where evalInequality x1 x2 = return $ if x1 /= x2 then (VBool True) else (VBool False)
 
 eval (And t e1 e2) = undefined
 
