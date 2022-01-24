@@ -7,5 +7,8 @@ float aFloat = (-1 + 0) * 3 - 4 * 5.1 * 6;
 int result = 10000000;
 result = factorial(5);
 
+print(base, "\n", aFloat, "\n", result, "\n");
+
+print("Enter your name: ");
 char[] name = input char[];
-print("Hi, ", name);
+print("Hi, ", name, "\n");

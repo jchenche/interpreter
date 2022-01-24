@@ -335,8 +335,10 @@ typedProgram =
         , Define TFloat "aFloat" (Minus TFloat (Mult TInt (Plus TInt (Neg TInt (Lit TInt (VInt 1))) (Lit TInt (VInt 0))) (Lit TInt (VInt 3))) (Mult TFloat (Mult TFloat (Lit TInt (VInt 4)) (Lit TFloat (VFloat 5.1))) (Lit TInt (VInt 6))))
         , Define TInt "result" (Lit TInt (VInt 10000000))
         , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])
+        , Print TVoid [Var TInt "base", Lit TChars (VChars "\n"), Var TFloat "aFloat", Lit TChars (VChars "\n"), Var TInt "result", Lit TChars (VChars "\n")]
+        , Print TVoid [Lit TChars (VChars "Enter your name: ")]
         , Define TChars "name" (Input TChars)
-        , Print TVoid [Lit TChars (VChars "Hi, "), Var TChars "name"]
+        , Print TVoid [Lit TChars (VChars "Hi, "), Var TChars "name", Lit TChars (VChars "\n")]
         ]
 
 typedPlayground :: Prog

@@ -129,8 +129,10 @@ program =
         , Define TFloat "aFloat" (Minus (Mult (Plus (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
         , Define TInt "result" (Lit (VInt 10000000))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
+        , Print [Var "base", Lit (VChars "\n"), Var "aFloat", Lit (VChars "\n"), Var "result", Lit (VChars "\n")]
+        , Print [Lit (VChars "Enter your name: ")]
         , Define TChars "name" (Input TChars)
-        , Print [Lit (VChars "Hi, "), Var "name"]
+        , Print [Lit (VChars "Hi, "), Var "name", Lit (VChars "\n")]
     ]
 
 playground :: Prog
