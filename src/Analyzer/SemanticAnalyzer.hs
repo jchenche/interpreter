@@ -327,11 +327,9 @@ getT (Var t _) = t
 
 typedProgram :: Prog
 typedProgram =
-    Prog [Define TInt "base" (Lit TInt (VInt 1))
-        , Func (Sig TInt [TInt]) TInt "factorial" [Param TInt "num"] 
-            (Cond TInt (Equal TBool (Var TInt "num") (Var TInt "base"))
-            (Var TInt "base")
-            (Mult TInt (Var TInt "num") (Call TInt "factorial" [Minus TInt (Var TInt "num") (Lit TInt (VInt 1))])))
+    Prog [Print TVoid [Lit TChars (VChars "Beginning of program"), Lit TChars (VChars "\n")]
+        , Define TInt "base" (Lit TInt (VInt 1))
+        , Func (Sig TInt [TInt]) TInt "factorial" [Param TInt "num"] (Cond TInt (Equal TBool (Var TInt "num") (Var TInt "base")) (Var TInt "base") (Mult TInt (Var TInt "num") (Call TInt "factorial" [Minus TInt (Var TInt "num") (Lit TInt (VInt 1))])))
         , Define TFloat "aFloat" (Minus TFloat (Mult TInt (Plus TInt (Neg TInt (Lit TInt (VInt 1))) (Lit TInt (VInt 0))) (Lit TInt (VInt 3))) (Mult TFloat (Mult TFloat (Lit TInt (VInt 4)) (Lit TFloat (VFloat 5.1))) (Lit TInt (VInt 6))))
         , Define TInt "result" (Lit TInt (VInt 10000000))
         , Assign TInt "result" (Call TInt "factorial" [Lit TInt (VInt 5)])
@@ -339,6 +337,9 @@ typedProgram =
         , Print TVoid [Lit TChars (VChars "Enter your name: ")]
         , Define TChars "name" (Input TChars)
         , Print TVoid [Lit TChars (VChars "Hi, "), Var TChars "name", Lit TChars (VChars "\n")]
+        , Loop TVoid (LesserEq TBool (Var TInt "base") (Lit TInt (VInt 3))) (Block TInt [Print TVoid [Var TInt "base", Lit TChars (VChars " ")], Assign TInt "base" (Plus TInt (Var TInt "base") (Lit TInt (VInt 1)))])
+        , Print TVoid [Lit TChars (VChars "base after loop: "), Var TInt "base", Lit TChars (VChars "\n")]
+        , Print TVoid [Lit TChars (VChars "End of program"), Lit TChars (VChars "\n")]
         ]
 
 typedPlayground :: Prog

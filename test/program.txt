@@ -1,3 +1,5 @@
+print("Beginning of program", "\n");
+
 int base = 1;
 
 int factorial(int num) if (num == base) base else num * factorial(num - 1);
@@ -12,3 +14,11 @@ print(base, "\n", aFloat, "\n", result, "\n");
 print("Enter your name: ");
 char[] name = input char[];
 print("Hi, ", name, "\n");
+
+while (base <= 3) {
+    print(base, " ");
+    base = base + 1;
+};
+print("base after loop: ", base, "\n");
+
+print("End of program", "\n");

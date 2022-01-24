@@ -222,7 +222,14 @@ eval (Cond _ e1 e2 e3) =
              _           -> error "Illegal State: the condition in the if expr must be a boolean!"
        }
 
-eval (Loop t e body) = undefined
+eval (Loop _ e body) = evalLoop e body
+    where evalLoop e body =
+              do { v <- eval e
+                 ; case v of
+                       VBool True  -> eval body >> evalLoop e body
+                       VBool False -> return VNull
+                       _           -> error "Illegal State: the condition in the loop expr must be a boolean!"
+                 }
 
 eval (Input t) = liftIO getLine >>= (\input -> evalInput input t) -- or lift . lift instead of liftIO
 

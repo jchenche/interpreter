@@ -121,11 +121,9 @@ params = commaSep (Param <$> parseType <*> identifier)
 
 program :: Prog
 program =
-    Prog [Define TInt "base" (Lit (VInt 1))
-        , Func TInt "factorial" [Param TInt "num"] 
-            (Cond (Equal (Var "num") (Var "base"))
-            (Var "base")
-            (Mult (Var "num") (Call "factorial" [Minus (Var "num") (Lit (VInt 1))])))
+    Prog [Print [Lit (VChars "Beginning of program"), Lit (VChars "\n")]
+        , Define TInt "base" (Lit (VInt 1))
+        , Func TInt "factorial" [Param TInt "num"] (Cond (Equal (Var "num") (Var "base")) (Var "base") (Mult (Var "num") (Call "factorial" [Minus (Var "num") (Lit (VInt 1))])))
         , Define TFloat "aFloat" (Minus (Mult (Plus (Neg (Lit (VInt 1))) (Lit (VInt 0))) (Lit (VInt 3))) (Mult (Mult (Lit (VInt 4)) (Lit (VFloat 5.1))) (Lit (VInt 6))))
         , Define TInt "result" (Lit (VInt 10000000))
         , Assign "result" (Call "factorial" [Lit (VInt 5)])
@@ -133,6 +131,9 @@ program =
         , Print [Lit (VChars "Enter your name: ")]
         , Define TChars "name" (Input TChars)
         , Print [Lit (VChars "Hi, "), Var "name", Lit (VChars "\n")]
+        , Loop (LesserEq (Var "base") (Lit (VInt 3))) (Block [Print [Var "base", Lit (VChars " ")], Assign "base" (Plus (Var "base") (Lit (VInt 1)))])
+        , Print [Lit (VChars "base after loop: "), Var "base", Lit (VChars "\n")]
+        , Print [Lit (VChars "End of program"), Lit (VChars "\n")]
     ]
 
 playground :: Prog
