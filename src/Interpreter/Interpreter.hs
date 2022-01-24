@@ -64,7 +64,8 @@ eval (Div _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt _, VInt 0)       -> throwError DivByZero
+             (_, VInt 0)            -> throwError DivByZero
+             (_, VFloat 0)          -> throwError DivByZero
              (VInt x1, VInt x2)     -> return $ VFloat (fromIntegral x1 / fromIntegral x2)
              (VFloat x1, VFloat x2) -> return $ VFloat (x1 / x2)
              (VInt x1, VFloat x2)   -> return $ VFloat (fromIntegral x1 / x2)
