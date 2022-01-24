@@ -106,7 +106,7 @@ eval (Lesser _ e1 e2) =
              (VChars x1, VChars x2) -> evalEquality x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ if x1 < x2 then (VBool True) else (VBool False)
+    where evalEquality x1 x2 = return $ VBool (x1 < x2)
 
 eval (LesserEq _ e1 e2) =
     do { v1 <- eval e1
@@ -119,7 +119,7 @@ eval (LesserEq _ e1 e2) =
              (VChars x1, VChars x2) -> evalEquality x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ if x1 <= x2 then (VBool True) else (VBool False)
+    where evalEquality x1 x2 = return $ VBool (x1 <= x2)
 
 eval (Greater _ e1 e2) =
     do { v1 <- eval e1
@@ -132,7 +132,7 @@ eval (Greater _ e1 e2) =
              (VChars x1, VChars x2) -> evalEquality x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ if x1 > x2 then (VBool True) else (VBool False)
+    where evalEquality x1 x2 = return $ VBool (x1 > x2)
 
 eval (GreaterEq _ e1 e2) =
     do { v1 <- eval e1
@@ -145,7 +145,7 @@ eval (GreaterEq _ e1 e2) =
              (VChars x1, VChars x2) -> evalEquality x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ if x1 >= x2 then (VBool True) else (VBool False)
+    where evalEquality x1 x2 = return $ VBool (x1 >= x2)
 
 eval (Equal _ e1 e2) =
     do { v1 <- eval e1
@@ -158,7 +158,7 @@ eval (Equal _ e1 e2) =
              (VChars x1, VChars x2) -> evalEquality x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ if x1 == x2 then (VBool True) else (VBool False)
+    where evalEquality x1 x2 = return $ VBool (x1 == x2)
 
 eval (NotEqual _ e1 e2) =
     do { v1 <- eval e1
@@ -171,13 +171,13 @@ eval (NotEqual _ e1 e2) =
              (VChars x1, VChars x2) -> evalInequality x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalInequality x1 x2 = return $ if x1 /= x2 then (VBool True) else (VBool False)
+    where evalInequality x1 x2 = return $ VBool (x1 /= x2)
 
 eval (And _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VBool x1, VBool x2) -> return $ if x1 && x2 then (VBool True) else (VBool False)
+             (VBool x1, VBool x2) -> return $ VBool (x1 && x2)
              _                    -> error "Illegal State: Logic operator performed on non-booleans!"
        }
 
@@ -185,7 +185,7 @@ eval (Or _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VBool x1, VBool x2) -> return $ if x1 || x2 then (VBool True) else (VBool False)
+             (VBool x1, VBool x2) -> return $ VBool (x1 || x2)
              _                    -> error "Illegal State: Logic operator performed on non-booleans!"
        }
 
