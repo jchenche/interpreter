@@ -61,13 +61,50 @@ eval (Neg _ e) =
              _        -> error "Illegal State: Cannot negate a non-number!"
        }
 
-eval (Mult t e1 e2) = undefined
+eval (Mult _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> return $ VInt (x1 * x2)
+             (VFloat x1, VFloat x2) -> return $ VFloat (x1 * x2)
+             (VInt x1, VFloat x2)   -> return $ VFloat (fromIntegral x1 * x2)
+             (VFloat x1, VInt x2)   -> return $ VFloat (x1 * fromIntegral x2)
+             _                      -> error "Illegal State: Arithmetic performed on non-numbers!"
+       }
 
-eval (Div t e1 e2) = undefined
+eval (Div _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt _, VInt 0)       -> throwError DivByZero
+             (VInt x1, VInt x2)     -> return $ VFloat (fromIntegral x1 / fromIntegral x2)
+             (VFloat x1, VFloat x2) -> return $ VFloat (x1 / x2)
+             (VInt x1, VFloat x2)   -> return $ VFloat (fromIntegral x1 / x2)
+             (VFloat x1, VInt x2)   -> return $ VFloat (x1 / fromIntegral x2)
+             _                      -> error "Illegal State: Arithmetic performed on non-numbers!"
+       }
 
-eval (Plus t e1 e2) = undefined
+eval (Plus _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> return $ VInt (x1 + x2)
+             (VFloat x1, VFloat x2) -> return $ VFloat (x1 + x2)
+             (VInt x1, VFloat x2)   -> return $ VFloat (fromIntegral x1 + x2)
+             (VFloat x1, VInt x2)   -> return $ VFloat (x1 + fromIntegral x2)
+             _                      -> error "Illegal State: Arithmetic performed on non-numbers!"
+       }
 
-eval (Minus t e1 e2) = undefined
+eval (Minus _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VInt x1, VInt x2)     -> return $ VInt (x1 - x2)
+             (VFloat x1, VFloat x2) -> return $ VFloat (x1 - x2)
+             (VInt x1, VFloat x2)   -> return $ VFloat (fromIntegral x1 - x2)
+             (VFloat x1, VInt x2)   -> return $ VFloat (x1 - fromIntegral x2)
+             _                      -> error "Illegal State: Arithmetic performed on non-numbers!"
+       }
 
 eval (Lesser t e1 e2) = undefined
 

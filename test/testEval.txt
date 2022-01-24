@@ -2,7 +2,7 @@ float aFloat = 1.2;
 int num = 300;
 int factorial(int x)
 {
-    if (true) 1 else factorial(x - 1);
+    if (true) 2 * -3 else factorial(x - 1);
 };
 
 print("Input is: ", -(input float), "\n");

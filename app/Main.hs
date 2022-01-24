@@ -22,5 +22,4 @@ main =
                              }
        }
 
--- Note: during evaluation, fromIntegral is useful for arithmetic involving an integer and a float. M.adjust or M.alter (or just M.update) is useful in variable assignments.
 -- TODO: define array access and modification

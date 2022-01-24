@@ -10,7 +10,9 @@ import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import qualified Data.Map.Strict as M
 
 data SemanticError = TypeMismatch Type Type
-                   | OperandTypeError Type Type
+                   | ArithOperandTypeError Type Type
+                   | CompOperandTypeError Type Type
+                   | LogicOperandTypeError Type Type
                    | BranchTypeMismatch Type Type
                    | SignatureMismatch Ident
                    | ExprIsNotNum Type
@@ -215,10 +217,9 @@ arithTypeChecker e1 e2 opConstructor =
                               (TFloat, TFloat) -> TFloat
                               (TInt, TFloat)   -> TFloat
                               (TFloat, TInt)   -> TFloat
-                              (TChars, TChars) -> TChars
                               _                -> TVoid
        ; if resultType == TVoid
-         then throwError $ OperandTypeError leftType rightType
+         then throwError $ ArithOperandTypeError leftType rightType
          else return $ opConstructor resultType typedE1 typedE2
        }
 
@@ -236,7 +237,7 @@ compTypeChecker e1 e2 opConstructor =
                               (TChars, TChars) -> TBool
                               _                -> TVoid
        ; if resultType /= TBool
-         then throwError $ OperandTypeError leftType rightType
+         then throwError $ CompOperandTypeError leftType rightType
          else return $ opConstructor TBool typedE1 typedE2
        }
 
@@ -245,7 +246,7 @@ logicTypeChecker e1 e2 opConstructor =
     do { typedE1 <- typec e1
        ; typedE2 <- typec e2
        ; if getT typedE1 /= TBool || getT typedE2 /= TBool
-         then throwError $ OperandTypeError (getT typedE1) (getT typedE2)
+         then throwError $ LogicOperandTypeError (getT typedE1) (getT typedE2)
          else return $ opConstructor TBool typedE1 typedE2
        }
 
