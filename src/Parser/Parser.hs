@@ -18,13 +18,13 @@ expr :: GenParser Char st Expr
 expr = buildExpressionParser opTable term <?> "expression"
 
 opTable = [ [prefix "!" Not, prefix "-" Neg, prefix "+" id]
-        , [binary "*" Mult AssocLeft, binary "/" Div AssocLeft]
-        , [binary "+" Plus AssocLeft, binary "-" Minus AssocLeft]
-        , [binary "<" Lesser AssocNone, binary "<=" LesserEq AssocNone, binary ">" Greater AssocNone, binary ">=" GreaterEq AssocNone]
-        , [binary "==" Equal AssocNone, binary "!=" NotEqual AssocNone]
-        , [binary "&&" And AssocLeft]
-        , [binary "||" Or AssocLeft]
-        ]
+          , [binary "*" Mult AssocLeft, binary "/" Div AssocLeft]
+          , [binary "+" Plus AssocLeft, binary "-" Minus AssocLeft]
+          , [binary "<" Lesser AssocNone, binary "<=" LesserEq AssocNone, binary ">" Greater AssocNone, binary ">=" GreaterEq AssocNone]
+          , [binary "==" Equal AssocNone, binary "!=" NotEqual AssocNone]
+          , [binary "&&" And AssocLeft]
+          , [binary "||" Or AssocLeft]
+          ]
 
 binary name fun assoc = Infix (do{ reservedOp name; return fun }) assoc
 prefix name fun = Prefix (do{ reservedOp name; return fun })
