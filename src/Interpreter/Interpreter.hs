@@ -99,79 +99,79 @@ eval (Lesser _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt x1, VInt x2)     -> evalEquality x1 x2
-             (VFloat x1, VFloat x2) -> evalEquality x1 x2
-             (VChar x1, VChar x2)   -> evalEquality x1 x2
-             (VBool x1, VBool x2)   -> evalEquality x1 x2
-             (VChars x1, VChars x2) -> evalEquality x1 x2
+             (VInt x1, VInt x2)     -> evalComparison x1 x2
+             (VFloat x1, VFloat x2) -> evalComparison x1 x2
+             (VChar x1, VChar x2)   -> evalComparison x1 x2
+             (VBool x1, VBool x2)   -> evalComparison x1 x2
+             (VChars x1, VChars x2) -> evalComparison x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ VBool (x1 < x2)
+    where evalComparison x1 x2 = return $ VBool (x1 < x2)
 
 eval (LesserEq _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt x1, VInt x2)     -> evalEquality x1 x2
-             (VFloat x1, VFloat x2) -> evalEquality x1 x2
-             (VChar x1, VChar x2)   -> evalEquality x1 x2
-             (VBool x1, VBool x2)   -> evalEquality x1 x2
-             (VChars x1, VChars x2) -> evalEquality x1 x2
+             (VInt x1, VInt x2)     -> evalComparison x1 x2
+             (VFloat x1, VFloat x2) -> evalComparison x1 x2
+             (VChar x1, VChar x2)   -> evalComparison x1 x2
+             (VBool x1, VBool x2)   -> evalComparison x1 x2
+             (VChars x1, VChars x2) -> evalComparison x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ VBool (x1 <= x2)
+    where evalComparison x1 x2 = return $ VBool (x1 <= x2)
 
 eval (Greater _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt x1, VInt x2)     -> evalEquality x1 x2
-             (VFloat x1, VFloat x2) -> evalEquality x1 x2
-             (VChar x1, VChar x2)   -> evalEquality x1 x2
-             (VBool x1, VBool x2)   -> evalEquality x1 x2
-             (VChars x1, VChars x2) -> evalEquality x1 x2
+             (VInt x1, VInt x2)     -> evalComparison x1 x2
+             (VFloat x1, VFloat x2) -> evalComparison x1 x2
+             (VChar x1, VChar x2)   -> evalComparison x1 x2
+             (VBool x1, VBool x2)   -> evalComparison x1 x2
+             (VChars x1, VChars x2) -> evalComparison x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ VBool (x1 > x2)
+    where evalComparison x1 x2 = return $ VBool (x1 > x2)
 
 eval (GreaterEq _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt x1, VInt x2)     -> evalEquality x1 x2
-             (VFloat x1, VFloat x2) -> evalEquality x1 x2
-             (VChar x1, VChar x2)   -> evalEquality x1 x2
-             (VBool x1, VBool x2)   -> evalEquality x1 x2
-             (VChars x1, VChars x2) -> evalEquality x1 x2
+             (VInt x1, VInt x2)     -> evalComparison x1 x2
+             (VFloat x1, VFloat x2) -> evalComparison x1 x2
+             (VChar x1, VChar x2)   -> evalComparison x1 x2
+             (VBool x1, VBool x2)   -> evalComparison x1 x2
+             (VChars x1, VChars x2) -> evalComparison x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ VBool (x1 >= x2)
+    where evalComparison x1 x2 = return $ VBool (x1 >= x2)
 
 eval (Equal _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt x1, VInt x2)     -> evalEquality x1 x2
-             (VFloat x1, VFloat x2) -> evalEquality x1 x2
-             (VChar x1, VChar x2)   -> evalEquality x1 x2
-             (VBool x1, VBool x2)   -> evalEquality x1 x2
-             (VChars x1, VChars x2) -> evalEquality x1 x2
+             (VInt x1, VInt x2)     -> evalComparison x1 x2
+             (VFloat x1, VFloat x2) -> evalComparison x1 x2
+             (VChar x1, VChar x2)   -> evalComparison x1 x2
+             (VBool x1, VBool x2)   -> evalComparison x1 x2
+             (VChars x1, VChars x2) -> evalComparison x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalEquality x1 x2 = return $ VBool (x1 == x2)
+    where evalComparison x1 x2 = return $ VBool (x1 == x2)
 
 eval (NotEqual _ e1 e2) =
     do { v1 <- eval e1
        ; v2 <- eval e2
        ; case (v1, v2) of
-             (VInt x1, VInt x2)     -> evalInequality x1 x2
-             (VFloat x1, VFloat x2) -> evalInequality x1 x2
-             (VChar x1, VChar x2)   -> evalInequality x1 x2
-             (VBool x1, VBool x2)   -> evalInequality x1 x2
-             (VChars x1, VChars x2) -> evalInequality x1 x2
+             (VInt x1, VInt x2)     -> evalComparison x1 x2
+             (VFloat x1, VFloat x2) -> evalComparison x1 x2
+             (VChar x1, VChar x2)   -> evalComparison x1 x2
+             (VBool x1, VBool x2)   -> evalComparison x1 x2
+             (VChars x1, VChars x2) -> evalComparison x1 x2
              _                      -> error "Illegal State: Comparison performed on wrong values!"
        }
-    where evalInequality x1 x2 = return $ VBool (x1 /= x2)
+    where evalComparison x1 x2 = return $ VBool (x1 /= x2)
 
 eval (And _ e1 e2) =
     do { v1 <- eval e1
