@@ -173,9 +173,21 @@ eval (NotEqual _ e1 e2) =
        }
     where evalInequality x1 x2 = return $ if x1 /= x2 then (VBool True) else (VBool False)
 
-eval (And t e1 e2) = undefined
+eval (And _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VBool x1, VBool x2) -> return $ if x1 && x2 then (VBool True) else (VBool False)
+             _                    -> error "Illegal State: Logic performed on non-booleans!"
+       }
 
-eval (Or t e1 e2) = undefined
+eval (Or _ e1 e2) =
+    do { v1 <- eval e1
+       ; v2 <- eval e2
+       ; case (v1, v2) of
+             (VBool x1, VBool x2) -> return $ if x1 || x2 then (VBool True) else (VBool False)
+             _                    -> error "Illegal State: Logic performed on non-booleans!"
+       }
 
 eval f@(Func _ _ ident _ _) =
     do { env <- get
