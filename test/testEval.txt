@@ -1,12 +1,11 @@
 float aFloat = 1.2;
 int num = 300;
-int factorial(int x) num;
+int factorial(int x)
 {
-    int x = 1;
-    aFloat = 12345.6;
-    print(factorial(3), "\n");
+    if (true) 1 else factorial(x - 1);
 };
 
-print("Input is: ", input float, "\n");
-print("Variable is: ", aFloat, "\n");
+print("Input is: ", -(input float), "\n");
+print("Variable is: ", -aFloat, "\n");
+print("Factorial is ", factorial(3), "\n");
 aFloat = 0.0;

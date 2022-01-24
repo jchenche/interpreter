@@ -45,9 +45,21 @@ programEvaluator (Prog es) =
 
 eval :: Expr -> Interpreter Val
 
-eval (Not t e) = undefined
+eval (Not _ e) =
+    do { v <- eval e
+       ; case v of
+             VBool True  -> return $ VBool False
+             VBool False -> return $ VBool True
+             _           -> error "Illegal State: Cannot apply Not to a non-boolean!"
+       }
 
-eval (Neg t e) = undefined
+eval (Neg _ e) =
+    do { v <- eval e
+       ; case v of
+             VInt x   -> return $ VInt (-x)
+             VFloat x -> return $ VFloat (-x)
+             _        -> error "Illegal State: Cannot negate a non-number!"
+       }
 
 eval (Mult t e1 e2) = undefined
 
@@ -98,7 +110,13 @@ eval (Block _ es) =
          else return $ last vs
        }
 
-eval (Cond t e1 e2 e3) = undefined
+eval (Cond _ e1 e2 e3) =
+    do { v <- eval e1
+       ; case v of
+             VBool True  -> eval e2
+             VBool False -> eval e3
+             _           -> error "Illegal State: the condition in the if expr must be a boolean!"
+       }
 
 eval (Loop t e body) = undefined
 
@@ -142,6 +160,24 @@ eval (Var _ ident) =
              Just (Closure _ _) -> error "Illegal State: Variable not in scope!"
              Just v             -> return v
        }
+
+-- compEvaluator :: Expr -> Expr -> (Expr -> Val) -> Interpreter Val
+-- compEvaluator e1 e2 opConstructor =
+--     do { typedE1 <- typec e1
+--        ; typedE2 <- typec e2
+--        ; let leftType = getT typedE1
+--        ; let rightType = getT typedE2
+--        ; let resultType = case (leftType, rightType) of
+--                               (TInt, TInt)     -> TBool
+--                               (TFloat, TFloat) -> TBool
+--                               (TChar, TChar)   -> TBool
+--                               (TBool, TBool)   -> TBool
+--                               (TChars, TChars) -> TBool
+--                               _                -> TVoid
+--        ; if resultType /= TBool
+--          then throwError $ OperandTypeError leftType rightType
+--          else return $ opConstructor TBool typedE1 typedE2
+--        }
 
 evalInput :: String -> Type -> Interpreter Val
 evalInput input TInt =
