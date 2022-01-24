@@ -219,7 +219,7 @@ eval (Cond _ e1 e2 e3) =
        ; case v of
              VBool True  -> eval e2
              VBool False -> eval e3
-             _           -> error "Illegal State: the condition in the if expr must be a boolean!"
+             _           -> error "Illegal State: The condition in the \"if\" expr must be a boolean!"
        }
 
 eval (Loop _ e body) = evalLoop e body
@@ -228,7 +228,7 @@ eval (Loop _ e body) = evalLoop e body
                  ; case v of
                        VBool True  -> eval body >> evalLoop e body
                        VBool False -> return VNull
-                       _           -> error "Illegal State: the condition in the loop expr must be a boolean!"
+                       _           -> error "Illegal State: The condition in the \"loop\" expr must be a boolean!"
                  }
 
 eval (Input t) = liftIO getLine >>= (\input -> evalInput input t) -- or lift . lift instead of liftIO
