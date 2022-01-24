@@ -115,14 +115,14 @@ eval (Call _ ident args) =
        ; case inScope ident env of
              Just closure@(Closure (Func _ _ _ params body) closureEnv) ->
                  do { vs <- mapM (\arg -> eval arg) args
-                    ; put closureEnv
+                    ; put closureEnv -- Switch to the env captured when the function was evaluated
                     ; pushScope
                     ; extendEnvWithParams (zip params vs)
                     ; extendedClosureEnv <- get
                     ; storeIdentInTopScope ident closure extendedClosureEnv
                     ; returnValue <- eval body
                     ; popScope
-                    ; put env
+                    ; put env -- Switch back to the env where the call was evaluated
                     ; return returnValue
                     }
              _                                                          -> error "Illegal State: Function not in scope!"
