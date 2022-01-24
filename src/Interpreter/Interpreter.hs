@@ -178,7 +178,7 @@ eval (And _ e1 e2) =
        ; v2 <- eval e2
        ; case (v1, v2) of
              (VBool x1, VBool x2) -> return $ if x1 && x2 then (VBool True) else (VBool False)
-             _                    -> error "Illegal State: Logic performed on non-booleans!"
+             _                    -> error "Illegal State: Logic operator performed on non-booleans!"
        }
 
 eval (Or _ e1 e2) =
@@ -186,7 +186,7 @@ eval (Or _ e1 e2) =
        ; v2 <- eval e2
        ; case (v1, v2) of
              (VBool x1, VBool x2) -> return $ if x1 || x2 then (VBool True) else (VBool False)
-             _                    -> error "Illegal State: Logic performed on non-booleans!"
+             _                    -> error "Illegal State: Logic operator performed on non-booleans!"
        }
 
 eval f@(Func _ _ ident _ _) =
