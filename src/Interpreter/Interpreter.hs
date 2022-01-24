@@ -24,18 +24,6 @@ type Interpreter = ExceptT RuntimeError (StateT DynamicEnv IO)
 interpretAST :: Prog -> IO (Either RuntimeError (), DynamicEnv)
 interpretAST ast = runStateT (runExceptT (programEvaluator ast)) []
 
--- programEvaluator :: Prog -> Interpreter Val
--- programEvaluator (Prog es) =
---     do { env <- get
---        ; put (M.empty:env)
---        ; liftIO $ putStrLn "Put your name below..."
---        ; liftIO $ putStr "Name: " >> hFlush stdout
---        ; input <- liftIO getLine
---        ; liftIO $ print ("Hello " ++ input) -- or lift . lift $ print "hi"
---        ; throwError ArrayOutOfBound
---        ; return $ VInt 3
---        }
-
 programEvaluator :: Prog -> Interpreter ()
 programEvaluator (Prog es) =
     do { pushScope
@@ -157,7 +145,7 @@ eval (Cond _ e1 e2 e3) =
 
 eval (Loop t e body) = undefined
 
-eval (Input t) = liftIO getLine >>= (\input -> evalInput input t)
+eval (Input t) = liftIO getLine >>= (\input -> evalInput input t) -- or lift . lift instead of liftIO
 
 eval (Print _ args) =
     do { vs <- mapM (\arg -> eval arg) args
@@ -197,24 +185,6 @@ eval (Var _ ident) =
              Just (Closure _ _) -> error "Illegal State: Variable not in scope!"
              Just v             -> return v
        }
-
--- compEvaluator :: Expr -> Expr -> (Expr -> Val) -> Interpreter Val
--- compEvaluator e1 e2 opConstructor =
---     do { typedE1 <- typec e1
---        ; typedE2 <- typec e2
---        ; let leftType = getT typedE1
---        ; let rightType = getT typedE2
---        ; let resultType = case (leftType, rightType) of
---                               (TInt, TInt)     -> TBool
---                               (TFloat, TFloat) -> TBool
---                               (TChar, TChar)   -> TBool
---                               (TBool, TBool)   -> TBool
---                               (TChars, TChars) -> TBool
---                               _                -> TVoid
---        ; if resultType /= TBool
---          then throwError $ OperandTypeError leftType rightType
---          else return $ opConstructor TBool typedE1 typedE2
---        }
 
 evalInput :: String -> Type -> Interpreter Val
 evalInput input TInt =
