@@ -3,14 +3,17 @@ module Parser.Lexer where
 import Text.Parsec
 import qualified Text.Parsec.Token as P
 
+keywordAssign = "="
+keywordArrow = "->"
+
 keywordInt = "int"
 keywordFloat = "float"
 keywordChar = "char"
 keywordBool = "bool"
-keywordInts = "int[]"
-keywordFloats = "float[]"
-keywordChars = "char[]"
-keywordBools = "bool[]"
+keywordInts = "ints"
+keywordFloats = "floats"
+keywordChars = "chars"
+keywordBools = "bools"
 keywordVoid = "void"
 keywordIf = "if"
 keywordElse = "else"
@@ -18,8 +21,6 @@ keywordWhile = "while"
 keywordTrue = "true"
 keywordFalse = "false"
 keywordNull = "null"
-keywordAssign = "="
-keywordArrow = "->"
 keywordInput = "input"
 keywordPrint = "print"
 
@@ -38,7 +39,7 @@ customDef =  P.LanguageDef {
             keywordInt, keywordFloat, keywordChar, keywordBool, 
             keywordInts, keywordFloats, keywordChars, keywordBools, keywordVoid,
             keywordIf, keywordElse, keywordWhile, keywordTrue, keywordFalse, keywordNull,
-            keywordAssign, keywordArrow, keywordInput, keywordPrint
+            keywordInput, keywordPrint
         ],
     P.reservedOpNames =
         [

@@ -46,7 +46,7 @@ array ::= "[" ( (lit ("," lit)*) | <empty> ) "]"
 string ::= "\"" [^"]* "\""
 null ::= "null"
 ident ::= [_a-zA-Z][_a-zA-Z0-9]*
-type ::= "int" | "float" | "char" | "bool" | "int[]" | "float[]" | "char[]" | "bool[]" | "void"
+type ::= "int" | "float" | "char" | "bool" | "ints" | "floats" | "chars" | "bools" | "void"
 params ::= ( type ident ("," type ident)* ) | <empty>
 args ::= ( expr ("," expr)* ) | <empty>
 ```

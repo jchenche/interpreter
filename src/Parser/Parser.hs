@@ -57,7 +57,7 @@ func = do
 define = do
     { t <- parseType
     ; i <- identifier
-    ; reserved keywordAssign
+    ; reservedOp keywordAssign
     ; e <- expr
     ; return $ Define t i e
     }
@@ -102,7 +102,7 @@ call = Call <$> identifier <*> parens (commaSep expr)
 arrayMod = do
     { i <- identifier
     ; (e1, e2) <- brackets (do { e1 <- expr
-                               ; reserved keywordArrow
+                               ; reservedOp keywordArrow
                                ; e2 <- expr
                                ; return (e1, e2)
                                })
@@ -113,7 +113,7 @@ arrayAccess = ArrayAccess <$> identifier <*> brackets expr
 
 assign = do
     { i <- identifier
-    ; reserved keywordAssign
+    ; reservedOp keywordAssign
     ; e <- expr
     ; return $ Assign i e
     }

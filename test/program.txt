@@ -1,18 +1,18 @@
 print("Beginning of program", "\n");
 
-int base = 1;
+int base=1;
 
 int factorial(int num) if (num == base) base else num * factorial(num - 1);
 
 float aFloat = (-1 + 0) * 3 - 4 * 5.1 * 6;
 
 int result = 10000000;
-result = factorial(5);
+result=factorial(5);
 
 print(base, "\n", aFloat, "\n", result, "\n");
 
 print("Enter your name: ");
-char[] name = input char[];
+chars name = input chars;
 print("Hi, ", name, "\n");
 
 while (base <= 3) {
@@ -21,10 +21,10 @@ while (base <= 3) {
 };
 print("base after loop: ", base, "\n");
 
-int[] fib5 = [1, 1, 2, 3, 500];
+ints fib5 = [1, 1, 2, 3, 500];
 print("Fib5 = ", fib5, "\n");
 print("Fib5[4] = ", fib5[4], "\n");
-fib5[4 -> 5];
+fib5[4->5];
 print("Corrected Fib5 = ", fib5, "\n");
 
 print("End of program", "\n");
