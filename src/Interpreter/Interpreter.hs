@@ -347,7 +347,7 @@ evalArrayMod arr v index =
         (VBools xs, VBool x)   -> if 0 <= index && index < length xs
                                   then return $ VBools (modifyArray xs x index 0)
                                   else throwError $ ArrayOutOfBound (length xs) index
-        _                      -> error "Illegal State: value type doesn't match array element type!"
+        _                      -> error "Illegal State: Value type doesn't match array element type!"
 
 modifyArray :: [a] -> a -> Int -> Int -> [a]
 modifyArray [] v index currIndex = []
