@@ -28,7 +28,7 @@ main =
                                                      putStr "\x1b[30m" >> putStr "Environment: " >> print env
                                                  (Right _, _)    ->
                                                      putStr "\x1b[32m" >> putStrLn "=== SUCCESSFUL EXECUTION ===" >> putStr "\x1b[30m"
-                                          }
-                               }
+                                           }
+                              }
                  }
        }
