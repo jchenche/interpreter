@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f8c80daf493ca09046192085b3d2e53a4ae996b058ecbdbcc05e37c6526cacf8
+-- hash: 5a00138fb4ad43e71cc5ea30c7a00f33ee546f0da634e3aa4d07c121d11be681
 
 name:           interpreter
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/interpreter#readme>
-homepage:       https://github.com/githubuser/interpreter#readme
-bug-reports:    https://github.com/githubuser/interpreter/issues
-author:         Author name here
+homepage:       https://github.com/jchenche/interpreter#readme
+bug-reports:    https://github.com/jchenche/interpreter/issues
+author:         Jimmy Chen Chen
 maintainer:     example@example.com
-copyright:      2022 Author name here
+copyright:      2022 Jimmy Chen Chen
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/interpreter
+  location: https://github.com/jchenche/interpreter
 
 library
   exposed-modules:
