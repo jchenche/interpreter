@@ -1,5 +1,10 @@
 # Interpreter for [name of the language to be TBD]
 
+## Instructions to run
+### Must install Haskell Stack first (refer to https://docs.haskellstack.org/en/stable/README/)
+`source buildScript.sh` to build the interpreter  
+`jcc <source_filename>.txt` to run it
+
 ## Grammar
 ```
 prog ::= (expr ";")*
