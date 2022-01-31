@@ -2,11 +2,11 @@ module Interpreter.Interpreter where
 
 import AST.CommonAST
 import AST.TypedAST
-import Control.Monad.State (StateT, runStateT, put, get)
+import Control.Monad.State (StateT, runStateT, get, put)
 import Control.Monad.Except (ExceptT, runExceptT, throwError, liftIO)
 import System.IO (hFlush, stdout)
 import Text.Read (readMaybe)
-import qualified Data.Map.Strict as M
+import qualified Data.Map.Strict as M (lookup, insert, adjust, empty)
 
 data RuntimeError = DivByZero
                   | ArrayOutOfBound Int Int

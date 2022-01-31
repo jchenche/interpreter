@@ -5,9 +5,9 @@ import AST.CommonAST
 import qualified AST.PlainAST as PT -- PT stands for plain tree
 import AST.TypedAST
 -- import Control.Monad.Trans.State -- From the transformers library
-import Control.Monad.State (State, runState, put, get) -- From the mtl library
+import Control.Monad.State (State, runState, get, put) -- From the mtl library
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import qualified Data.Map.Strict as M
+import qualified Data.Map.Strict as M (Map, lookup, insert, empty)
 
 data SemanticError = TypeMismatch Type Type
                    | ArithOperandTypeError Type Type
