@@ -16,8 +16,9 @@ data RuntimeError = DivByZero
 
 instance Show RuntimeError where
     show DivByZero = "Attempt to divide by zero"
+    show (ArrayOutOfBound size index) = "Attempt to access index " ++ show index ++ " of an array with size " ++ show size
+    show AttemptToPrintFunc = "Attempt to print a function"
     show (InputError msg) = msg
-    show _ = "[TODO] Runtime error, refine later"
 
 type Interpreter = ExceptT RuntimeError (StateT DynamicEnv IO)
 
@@ -219,7 +220,7 @@ eval (Cond _ e1 e2 e3) =
        ; case v of
              VBool True  -> eval e2
              VBool False -> eval e3
-             _           -> error "Illegal State: The condition in the \"if\" expr must be a boolean!"
+             _           -> error "Illegal State: The condition in the \"If\" expression must be a boolean!"
        }
 
 eval (Loop _ e body) = evalLoop e body
@@ -228,7 +229,7 @@ eval (Loop _ e body) = evalLoop e body
                  ; case v of
                        VBool True  -> eval body >> evalLoop e body
                        VBool False -> return VNull
-                       _           -> error "Illegal State: The condition in the \"loop\" expr must be a boolean!"
+                       _           -> error "Illegal State: The condition in the \"Loop\" expression must be a boolean!"
                  }
 
 eval (Input t) = liftIO getLine >>= (\input -> evalInput input t) -- or lift . lift instead of liftIO

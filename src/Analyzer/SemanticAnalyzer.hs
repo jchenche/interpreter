@@ -18,6 +18,7 @@ data SemanticError = TypeMismatch Type Type
                    | ExprIsNotNum Type
                    | ExprIsNotInt Type
                    | ExprIsNotBool Type
+                   | CondIsNotBool Type
                    | ArrayNotInScope Ident
                    | VarNotInScope Ident
                    | FuncNotInScope Ident
@@ -28,9 +29,23 @@ data SemanticError = TypeMismatch Type Type
     deriving Eq
 
 instance Show SemanticError where
-    show (TypeMismatch t1 t2) = "Expecting type " ++ show t1 ++ " but got " ++ show t2
+    show (TypeMismatch t1 t2) = "Type " ++ show t1 ++ " doesn't match type " ++ show t2
+    show (ArithOperandTypeError t1 t2) = "Invalid type operands " ++ show t1 ++ " and " ++ show t2 ++ " in arithmetic operation"
+    show (CompOperandTypeError t1 t2) = "Invalid type operands " ++ show t1 ++ " and " ++ show t2 ++ " in comparison operation"
+    show (LogicOperandTypeError t1 t2) = "Non-boolean operands " ++ show t1 ++ " and " ++ show t2 ++ " in logical operation"
+    show (BranchTypeMismatch t1 t2) = "\"Then\" branch type " ++ show t1 ++ " doesn't match \"Else\" branch type " ++ show t2
+    show (SignatureMismatch ident) = "The arguments of the \"Call\" expression doesn't match the signature of " ++ ident
+    show (ExprIsNotNum t) = "Can't negate a non-number type " ++ show t
+    show (ExprIsNotInt t) = "Can't index into an array with a non-integer type " ++ show t
+    show (ExprIsNotBool t) = "Can't apply logical \"Not\" on a non-boolean type " ++ show t
+    show (CondIsNotBool t) = "Non-boolean type " ++ show t ++ " in condition expression"
+    show (ArrayNotInScope ident) = "Can't use array operations on non-array " ++ ident
+    show (VarNotInScope ident) = "Variable " ++ ident ++ " is not in defined in scope"
+    show (FuncNotInScope ident) = "Function " ++ ident ++ " is not in defined in scope"
+    show (VarConflict ident) = "Can't define variable " ++ ident ++ " because the identifier is already defined"
+    show (FuncConflict ident) = "Can't define function " ++ ident ++ " because the identifier is already defined"
+    show (ParamConflict ident) = "Multiple parameter " ++ ident ++ " defined"
     show InputTypeError = "Can only read integer, float, or string as input"
-    show _ = "[TODO] Semantic error, refine later"
 
 type StaticEnv = [M.Map Ident Type]
 
@@ -145,7 +160,7 @@ typec (PT.Block es) =
 typec (PT.Cond e1 e2 e3) =
     do { typedE1 <- typec e1
        ; if getT typedE1 /= TBool
-         then throwError $ ExprIsNotBool (getT typedE1)
+         then throwError $ CondIsNotBool (getT typedE1)
          else do { typedE2 <- typec e2
                  ; typedE3 <- typec e3
                  ; if getT typedE2 /= getT typedE3
@@ -157,7 +172,7 @@ typec (PT.Cond e1 e2 e3) =
 typec (PT.Loop e body) =
     do { typedE <- typec e
        ; if getT typedE /= TBool
-         then throwError $ ExprIsNotBool (getT typedE)
+         then throwError $ CondIsNotBool (getT typedE)
          else do { typedBody <- typec body
                  ; return $ Loop TVoid typedE typedBody
                  }
