@@ -21,6 +21,8 @@ term ::= func
        | input
        | print
        | call
+       | array_mod
+       | array_access
        | assign
        | var
 func ::= type ident "(" params ")" expr
@@ -32,6 +34,8 @@ loop ::= "while" "(" expr ")" expr
 input ::= "input" type
 print ::= "print" "(" args ")"
 call ::= ident "(" args ")"
+array_mod ::= ident "[" expr "->" expr "]"
+array_access ::= ident "[" expr "]"
 assign ::= ident "=" expr
 var ::= ident
 integer ::= \d+

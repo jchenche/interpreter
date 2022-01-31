@@ -21,5 +21,3 @@ main =
                                                          }
                              }
        }
-
--- TODO: define array access and modification

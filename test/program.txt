@@ -21,4 +21,10 @@ while (base <= 3) {
 };
 print("base after loop: ", base, "\n");
 
+int[] fib5 = [1, 1, 2, 3, 500];
+print("Fib5 = ", fib5, "\n");
+print("Fib5[4] = ", fib5[4], "\n");
+fib5[4 -> 5];
+print("Corrected Fib5 = ", fib5, "\n");
+
 print("End of program", "\n");

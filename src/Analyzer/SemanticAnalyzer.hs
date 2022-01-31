@@ -16,7 +16,9 @@ data SemanticError = TypeMismatch Type Type
                    | BranchTypeMismatch Type Type
                    | SignatureMismatch Ident
                    | ExprIsNotNum Type
+                   | ExprIsNotInt Type
                    | ExprIsNotBool Type
+                   | ArrayNotInScope Ident
                    | VarNotInScope Ident
                    | FuncNotInScope Ident
                    | VarConflict Ident
@@ -186,6 +188,41 @@ typec (PT.Call ident args) =
              _                                -> throwError $ FuncNotInScope ident
        }
 
+typec (PT.ArrayMod ident index e) =
+    do { env <- get
+       ; case inScope ident env of
+             Just TInts   -> typecheckArrayMod TInt TInts
+             Just TFloats -> typecheckArrayMod TFloat TFloats
+             Just TChars  -> typecheckArrayMod TChar TChars
+             Just TBools  -> typecheckArrayMod TBool TBools
+             _            -> throwError $ ArrayNotInScope ident
+       }
+    where typecheckArrayMod elemType arrayType =
+              do { typedIndex <- typec index
+                 ; typedE <- typec e
+                 ; if getT typedIndex /= TInt
+                   then throwError $ ExprIsNotInt (getT typedIndex)
+                   else if getT typedE /= elemType
+                        then throwError $ TypeMismatch (getT typedE) elemType
+                        else return $ ArrayMod arrayType ident typedIndex typedE
+                 }
+
+typec (PT.ArrayAccess ident index) =
+    do { env <- get
+       ; case inScope ident env of
+             Just TInts   -> typecheckArrayAccess TInt
+             Just TFloats -> typecheckArrayAccess TFloat
+             Just TChars  -> typecheckArrayAccess TChar
+             Just TBools  -> typecheckArrayAccess TBool
+             _            -> throwError $ ArrayNotInScope ident
+       }
+    where typecheckArrayAccess elemType =
+              do { typedIndex <- typec index
+                 ; if getT typedIndex /= TInt
+                   then throwError $ ExprIsNotInt (getT typedIndex)
+                   else return $ ArrayAccess elemType ident typedIndex
+                 }
+
 typec (PT.Assign ident e) =
     do { env <- get
        ; case inScope ident env of
@@ -322,6 +359,8 @@ getT (Loop t _ _) = t
 getT (Input t) = t
 getT (Print t _) = t
 getT (Call t _ _) = t
+getT (ArrayMod t _ _ _) = t
+getT (ArrayAccess t _ _) = t
 getT (Assign t _ _) = t
 getT (Var t _) = t
 
@@ -339,6 +378,11 @@ typedProgram =
         , Print TVoid [Lit TChars (VChars "Hi, "), Var TChars "name", Lit TChars (VChars "\n")]
         , Loop TVoid (LesserEq TBool (Var TInt "base") (Lit TInt (VInt 3))) (Block TInt [Print TVoid [Var TInt "base", Lit TChars (VChars " ")], Assign TInt "base" (Plus TInt (Var TInt "base") (Lit TInt (VInt 1)))])
         , Print TVoid [Lit TChars (VChars "base after loop: "), Var TInt "base", Lit TChars (VChars "\n")]
+        , Define TInts "fib5" (Lit TInts (VInts [1,1,2,3,500]))
+        , Print TVoid [Lit TChars (VChars "Fib5 = "), Var TInts "fib5", Lit TChars (VChars "\n")]
+        , Print TVoid [Lit TChars (VChars "Fib5[4] = "), ArrayAccess TInt "fib5" (Lit TInt (VInt 4)), Lit TChars (VChars "\n")]
+        , ArrayMod TInts "fib5" (Lit TInt (VInt 4)) (Lit TInt (VInt 5))
+        , Print TVoid [Lit TChars (VChars "Corrected Fib5 = "), Var TInts "fib5", Lit TChars (VChars "\n")]
         , Print TVoid [Lit TChars (VChars "End of program"), Lit TChars (VChars "\n")]
         ]
 

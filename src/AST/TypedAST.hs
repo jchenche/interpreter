@@ -24,6 +24,8 @@ data Expr = Not Type Expr | Neg Type Expr
           | Input Type
           | Print Type [Expr]
           | Call Type Ident [Expr]
+          | ArrayMod Type Ident Expr Expr
+          | ArrayAccess Type Ident Expr
           | Assign Type Ident Expr
           | Var Type Ident
     deriving (Show, Eq)

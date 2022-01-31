@@ -21,6 +21,8 @@ data Expr = Not Expr | Neg Expr
           | Input Type
           | Print [Expr]
           | Call Ident [Expr]
+          | ArrayMod Ident Expr Expr
+          | ArrayAccess Ident Expr
           | Assign Ident Expr
           | Var Ident
     deriving (Show, Eq)

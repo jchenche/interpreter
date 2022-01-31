@@ -40,6 +40,8 @@ term = try func
    <|> parseInput
    <|> parsePrint
    <|> try call
+   <|> try arrayMod
+   <|> try arrayAccess
    <|> try assign
    <|> var
    <?> "term"
@@ -97,6 +99,18 @@ parsePrint = Print <$> (reserved keywordPrint *> parens (commaSep expr))
 
 call = Call <$> identifier <*> parens (commaSep expr)
 
+arrayMod = do
+    { i <- identifier
+    ; (e1, e2) <- brackets (do { e1 <- expr
+                               ; reserved keywordArrow
+                               ; e2 <- expr
+                               ; return (e1, e2)
+                               })
+    ; return $ ArrayMod i e1 e2
+    }
+
+arrayAccess = ArrayAccess <$> identifier <*> brackets expr
+
 assign = do
     { i <- identifier
     ; reserved keywordAssign
@@ -133,6 +147,11 @@ program =
         , Print [Lit (VChars "Hi, "), Var "name", Lit (VChars "\n")]
         , Loop (LesserEq (Var "base") (Lit (VInt 3))) (Block [Print [Var "base", Lit (VChars " ")], Assign "base" (Plus (Var "base") (Lit (VInt 1)))])
         , Print [Lit (VChars "base after loop: "), Var "base", Lit (VChars "\n")]
+        , Define TInts "fib5" (Lit (VInts [1,1,2,3,500]))
+        , Print [Lit (VChars "Fib5 = "), Var "fib5", Lit (VChars "\n")]
+        , Print [Lit (VChars "Fib5[4] = "), ArrayAccess "fib5" (Lit (VInt 4)), Lit (VChars "\n")]
+        , ArrayMod "fib5" (Lit (VInt 4)) (Lit (VInt 5))
+        , Print [Lit (VChars "Corrected Fib5 = "), Var "fib5", Lit (VChars "\n")]
         , Print [Lit (VChars "End of program"), Lit (VChars "\n")]
     ]
 

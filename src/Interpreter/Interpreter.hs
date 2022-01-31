@@ -9,7 +9,7 @@ import Text.Read (readMaybe)
 import qualified Data.Map.Strict as M
 
 data RuntimeError = DivByZero
-                  | ArrayOutOfBound
+                  | ArrayOutOfBound Int Int
                   | AttemptToPrintFunc
                   | InputError String
     deriving Eq
@@ -257,6 +257,34 @@ eval (Call _ ident args) =
              _                                                          -> error "Illegal State: Function not in scope!"
        }
 
+eval (ArrayMod _ ident index e) =
+    do { env <- get
+       ; case inScope ident env of
+             Just arr -> do { (VInt indexVal) <- eval index
+                            ; v <- eval e
+                            ; modArr <- evalArrayMod arr v (fromInteger indexVal)
+                            ; updateVariable ident modArr env
+                            ; return modArr
+                            }
+             _        -> error "Illegal State: Array not in scope!"
+       }
+
+eval (ArrayAccess _ ident index) =
+    do { env <- get
+       ; case inScope ident env of
+             Just (VInts arr)   -> evalArrayAccess arr VInt
+             Just (VFloats arr) -> evalArrayAccess arr VFloat
+             Just (VChars arr)  -> evalArrayAccess arr VChar
+             Just (VBools arr)  -> evalArrayAccess arr VBool
+             _                  -> error "Illegal State: Array not in scope!"
+       }
+    where evalArrayAccess arr valConstructor =
+              do { (VInt indexVal) <- eval index
+                 ; if 0 <= indexVal && fromInteger indexVal < length arr
+                   then return $ valConstructor (arr!!fromInteger indexVal)
+                   else throwError $ ArrayOutOfBound (length arr) (fromInteger indexVal)
+                 }
+
 eval (Assign _ ident e) =
     do { v <- eval e
        ; env <- get
@@ -303,6 +331,29 @@ printValue v =
         VBools x    -> liftIO ((putStr . show) x >> hFlush stdout >> return ())
         VNull       -> liftIO (putStr "null" >> hFlush stdout >> return ())
         Closure _ _ -> throwError AttemptToPrintFunc
+
+evalArrayMod :: Val -> Val -> Int -> Interpreter Val
+evalArrayMod arr v index =
+    case (arr, v) of
+        (VInts xs, VInt x)     -> if 0 <= index && index < length xs
+                                  then return $ VInts (modifyArray xs x index 0)
+                                  else throwError $ ArrayOutOfBound (length xs) index
+        (VFloats xs, VFloat x) -> if 0 <= index && index < length xs
+                                  then return $ VFloats (modifyArray xs x index 0)
+                                  else throwError $ ArrayOutOfBound (length xs) index
+        (VChars xs, VChar x)   -> if 0 <= index && index < length xs
+                                  then return $ VChars (modifyArray xs x index 0)
+                                  else throwError $ ArrayOutOfBound (length xs) index
+        (VBools xs, VBool x)   -> if 0 <= index && index < length xs
+                                  then return $ VBools (modifyArray xs x index 0)
+                                  else throwError $ ArrayOutOfBound (length xs) index
+        _                      -> error "Illegal State: value type doesn't match array element type!"
+
+modifyArray :: [a] -> a -> Int -> Int -> [a]
+modifyArray [] v index currIndex = []
+modifyArray (x:xs) v index currIndex
+    | index == currIndex = v : xs
+    | otherwise          = x : modifyArray xs v index (currIndex + 1)
 
 -- Extract value of identifier from the environment starting from the inner most/top scope,
 -- stopping when you encounter one (this allows variable shadowing),
