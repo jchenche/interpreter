@@ -4,7 +4,7 @@ An interpreter for a programming language, called Gavagai, I designed for fun an
 ## Instructions to run
 ### Must install Haskell Stack first (refer to https://docs.haskellstack.org/en/stable/README/)
 `source buildScript.sh` to build the interpreter.  
-`jcc <source_filename>.txt` to interpret a program.
+`gavagai <source_filename>.txt` to interpret a program.
 
 ## Grammar
 ```
