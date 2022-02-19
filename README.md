@@ -1,5 +1,5 @@
 # Interpreter for Gavagai
-An interpreter for a programming language, called Gavagai, I designed for fun and exploration.
+An interpreter for an imperative programming language, called Gavagai, I designed for fun and exploration.
 
 ## Instructions to run
 ### Must install Haskell Stack first (refer to https://docs.haskellstack.org/en/stable/README/)
